@@ -1,21 +1,11 @@
-import { Prisma } from '@prisma/client/extension'
+import { createPermitClientExtension } from "./extension/PermitClientExtension";
+import { PermitExtensionConfig } from "./models/PermitExtensionConfig";
+import { IPermitConfig } from "./types/IPermitConfig";
+import { PermitClient } from "./client/PermitClient";
+import { PermitError } from "./utils/error";
 
-type Args = {}
+// Export public types
+export { PermitExtensionConfig, IPermitConfig, PermitError };
 
-export const existsFn = (_extensionArgs: Args) =>
-  Prisma.defineExtension({
-    name: "prisma-extension-find-or-create",
-    model: {
-      $allModels: {
-        async exists<T, A>(
-          this: T,
-          args: Prisma.Exact<A, Prisma.Args<T, 'findFirst'>>
-        ): Promise<boolean> {
-
-          const ctx = Prisma.getExtensionContext(this)
-          const result = await (ctx as any).findFirst(args)
-          return result !== null
-        },
-      },
-    },
-  })
+// Export the extension factory
+export default createPermitClientExtension;
