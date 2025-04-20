@@ -1,5 +1,3 @@
-// utils/permitUtils.ts
-
 import { AccessControlModel } from "../models/PermissionModels";
 
 /**
@@ -48,12 +46,10 @@ export function createResourceObject(
   operation: string,
   modelType?: AccessControlModel
 ): any {
-  // RBAC: Only care about the resource type
   if (modelType === AccessControlModel.RBAC) {
     return resourceType;
   }
 
-  // ABAC: Include attributes only
   if (modelType === AccessControlModel.ABAC) {
     return {
       type: resourceType,
@@ -61,7 +57,6 @@ export function createResourceObject(
     };
   }
 
-  // ReBAC (or ReBAC + ABAC): Include key and attributes
   if (modelType === AccessControlModel.ReBAC) {
     const key = getResourceId(args?.where);
     const attributes = extractAttributes(args);
@@ -73,7 +68,6 @@ export function createResourceObject(
     };
   }
 
-  // Fallback (treat as RBAC if modelType is undefined)
   return resourceType;
 }
 
@@ -83,12 +77,10 @@ export function createResourceObject(
 export function getResourceId(where: any): string | number | undefined {
   if (!where || typeof where !== "object") return undefined;
 
-  // First, check for common 'id' field
   if (where.id !== undefined) {
     return where.id;
   }
 
-  // Try to extract the first primitive value (e.g., { slug: 'abc' })
   for (const key in where) {
     const value = where[key];
     if (typeof value !== "object" && value !== undefined) {
@@ -99,18 +91,35 @@ export function getResourceId(where: any): string | number | undefined {
   return undefined;
 }
 
+export function getResourceIdForSync(
+  result: any,
+  operation: string
+): string | null {
+  if (!result) return null;
+
+  if (
+    operation === "create" ||
+    operation === "update" ||
+    operation === "delete"
+  ) {
+    if (result.id) return String(result.id);
+    if (Array.isArray(result) && result.length > 0 && result[0].id)
+      return String(result[0].id);
+  }
+
+  return null;
+}
+
 /**
  * Extract attributes from args.data or args.where (for ABAC/ReBAC checks)
  */
 export function extractAttributes(args: any): Record<string, any> {
   if (!args) return {};
 
-  // Prefer data if it exists (e.g., for create, update)
   if (args.data && typeof args.data === "object") {
     return { ...args.data };
   }
 
-  // Fallback to where (e.g., for findUnique or delete with filters)
   if (args.where && typeof args.where === "object") {
     return { ...args.where };
   }

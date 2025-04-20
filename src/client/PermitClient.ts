@@ -151,6 +151,126 @@ export class PermitClient implements IPermitClient {
     }
   }
 
+  async getUserPermissions(userId: string) {
+    return this.permitInstance.getUserPermissions(userId);
+  }
+
+  async getAllowedResourceIds(
+    userId: User,
+    resourceType: string,
+    action: Action
+  ): Promise<string[]> {
+    await this.ensureInitialized();
+
+    const userKey = typeof userId === "string" ? userId : userId.key;
+    const permissions = await this.getUserPermissions(userKey);
+
+    if (this.config.debug) {
+      logger.info(
+        `Fetched permissions for ${userId}: ${JSON.stringify(permissions)}`
+      );
+    }
+
+    const allowedKeys: string[] = [];
+    for (const [key, data] of Object.entries(
+      permissions as Record<string, any>
+    )) {
+      const [type, id] = key.split(":");
+      if (
+        type === resourceType &&
+        data.permissions.includes(`${resourceType}:${action}`)
+      ) {
+        allowedKeys.push(id);
+      }
+    }
+
+    return allowedKeys;
+  }
+
+  async syncResourceInstanceCreate(
+    resourceType: string,
+    resourceKey: string,
+    tenant: string = "default",
+    attributes: Record<string, any> = {}
+  ) {
+    await this.ensureInitialized();
+
+    const instanceData = {
+      resource: resourceType,
+      key: resourceKey,
+      tenant,
+      attributes,
+    };
+
+    try {
+      const result = await this.permitInstance.api.resourceInstances.create(
+        instanceData
+      );
+      if (this.config.debug) {
+        logger.info(
+          `Synced resource instance: ${resourceType}:${resourceKey} to Permit`
+        );
+      }
+      return result;
+    } catch (error: any) {
+      logger.error(
+        `Failed to sync resource instance ${resourceType}:${resourceKey}: ${error.message}`
+      );
+      throw error;
+    }
+  }
+
+  async syncResourceInstanceUpdate(
+    resourceType: string,
+    resourceKey: string,
+    tenant: string = "default",
+    attributes: Record<string, any> = {}
+  ) {
+    await this.ensureInitialized();
+
+    const instanceData = {
+      attributes,
+    };
+
+    const instanceKey = `${resourceType}:${resourceKey}`;
+
+    try {
+      const result = await this.permitInstance.api.resourceInstances.update(
+        instanceKey,
+        instanceData
+      );
+      if (this.config.debug) {
+        logger.info(`Updated resource instance: ${instanceKey} in Permit`);
+      }
+      return result;
+    } catch (error: any) {
+      logger.error(
+        `Failed to update resource instance ${instanceKey}: ${error.message}`
+      );
+      throw error;
+    }
+  }
+
+  async syncResourceInstanceDelete(
+    resourceType: string,
+    resourceKey: string
+  ): Promise<void> {
+    await this.ensureInitialized();
+
+    const instanceKey = `${resourceType}:${resourceKey}`;
+
+    try {
+      await this.permitInstance.api.resourceInstances.delete(instanceKey);
+      if (this.config.debug) {
+        logger.info(`Deleted resource instance: ${instanceKey} from Permit`);
+      }
+    } catch (error: any) {
+      logger.error(
+        `Failed to delete resource instance ${instanceKey}: ${error.message}`
+      );
+      throw error;
+    }
+  }
   /**
    * Get the underlying Permit SDK instance for advanced usage
    */

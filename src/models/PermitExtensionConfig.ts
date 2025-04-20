@@ -3,16 +3,12 @@ import { AccessControlModel } from "./PermissionModels";
 
 export interface PermitExtensionConfig {
   permitConfig: IPermitConfig;
+  enableAutomaticChecks?: boolean;
   enableAutoSync?: boolean;
+  enableDataFiltering?: boolean;
   defaultTenant?: string;
   resourceTypeMapping?: Record<string, string>;
-  contextEnricher?: (
-    modelName: string,
-    operation: string,
-    args: any
-  ) => Record<string, any>;
   debug?: boolean;
-  enableAutomaticChecks?: boolean;
   accessControlModel?: AccessControlModel;
   excludedModels?: string[];
   excludedOperations?: string[];

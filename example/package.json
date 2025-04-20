@@ -5,7 +5,8 @@
     "seed": "ts-node prisma/seed.ts",
     "test:abac": "ts-node abac-test.ts",
     "document:rbac": "ts-node rbac/document.ts",
-    "invoice:abac": "ts-node abac/invoice.ts"
+    "invoice:abac": "ts-node abac/invoice.ts",
+    "project-task:rebac": "ts-node rebac/project-task.ts"
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"

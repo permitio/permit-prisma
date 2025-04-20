@@ -3,9 +3,13 @@ import { PermitExtensionConfig } from "./models/PermitExtensionConfig";
 import { IPermitConfig } from "./types/IPermitConfig";
 import { PermitClient } from "./client/PermitClient";
 import { PermitError } from "./utils/error";
+import { AccessControlModel } from "./models/PermissionModels";
 
-// Export public types
-export { PermitExtensionConfig, IPermitConfig, PermitError };
+export {
+  PermitExtensionConfig,
+  IPermitConfig,
+  PermitError,
+  AccessControlModel,
+};
 
-// Export the extension factory
 export default createPermitClientExtension;

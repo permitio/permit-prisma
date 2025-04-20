@@ -1,49 +1,24 @@
-# Prisma Client Extension starter repository
+# Prisma Permit – Fine-Grained Authorization Extension for Prisma
 
-Use this template to bootstrap creating your Prisma Client extension.
+Prisma Permit (`@permitio/prisma-permit`) is a Prisma Client extension that integrates Permit.io's fine-grained access control into your database queries. It enables role-based, attribute-based, and relationship-based access checks (RBAC, ABAC, ReBAC) directly through the Prisma Client, helping secure your application at the data layer. By using this extension, you ensure that every database operation is authorized according to central policies defined in Permit.io.
 
-Client extensions provide a powerful way to add functionality to Prisma Client in a type-safe manner. You can use them to create simple and flexible solutions that are not natively supported by Prisma. 
+Prisma is a powerful ORM but **does not provide built-in fine-grained authorization controls**. As your application scales, you need stricter control over who can create, read, update, or delete specific data. This extension addresses that gap by enforcing permission checks and filtering data as part of Prisma queries.
 
+## Installation
 
+Install the package (alongside prisma client package) from npm:
 
-If you would like to learn more, refer to the [Prisma docs](https://www.prisma.io/docs/concepts/components/prisma-client/client-extensions) to learn more information.
-
-## Get started
-
-Click the **Use this template** button and provide details for your Client extension
-
-Install the dependencies:
-
-```
-npm install
+```bash
+npm install @permitio/prisma-permit @prisma/client
 ```
 
-Build the extension:
+### Prerequisites
 
-```
-npm run build
-```
+Make sure you have:
 
-Set up the example app:
-
-```
-cd example
-npm install
-npx prisma db push
-```
-
-Test the extension in the example app:
-```
-npm run dev
-```
-
-### Evolve the extension
-
-The code for the extension is located in the [`index.ts`](./src/index.ts) file. Feel free to update it before publishing your Client extension to [npm](https://npmjs.com/).
-
-## Learn more
-
-- [Docs — Client extensions](https://www.prisma.io/docs/concepts/components/prisma-client/client-extensions)
-- [Docs — Shared extensions](https://www.prisma.io/docs/concepts/components/prisma-client/client-extensions/shared-extensions)
-- [Examples](https://github.com/prisma/prisma-client-extensions/tree/main)
-- [Preview announcement blog post](https://www.prisma.io/blog/client-extensions-preview-8t3w27xkrxxn#introduction)
+- A Permit.io account. Sign up [here](https://app.permit.io) if you do not have one.
+- Permit's environment API key for your project (development/). See [here](https://docs.permit.io/api/api-with-cli/)
+- A Policy Decision Point (PDP)
+  - You can use Permit's hosted cloud PDP
+  - Or run a local PDP container (default is `http://localhost:7766`, recommended for ABAC/ReBAC). Read more on running a Local Policy Check using the PDP [here](https://docs.permit.io/overview/perform-a-local-policy-check/)
+- Defined your resources, actions, and roles/policies in Permit.io's dashboard or API before using the extension
