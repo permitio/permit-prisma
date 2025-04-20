@@ -1,10 +1,19 @@
 {
   "name": "example",
   "scripts": {
-    "dev": "ts-node --transpile-only index.ts"
+    "dev": "ts-node --transpile-only index.ts",
+    "seed": "ts-node prisma/seed.ts",
+    "test:abac": "ts-node abac-test.ts",
+    "document:rbac": "ts-node rbac/document.ts",
+    "invoice:abac": "ts-node abac/invoice.ts"
+  },
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
   },
   "dependencies": {
-    "@prisma/client": "^4.15.0"
+    "@prisma/client": "^4.15.0",
+    "dotenv": "^16.5.0",
+    "winston": "^3.17.0"
   },
   "devDependencies": {
     "@types/node": "^22.14.1",
