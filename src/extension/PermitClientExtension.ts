@@ -9,13 +9,14 @@ import {
   mapModelToResourceType,
   createResourceObject,
 } from "../utils/prismaPermitMapper";
+import logger from "../utils/logger";
 
 export function createPermitClientExtension(config: PermitExtensionConfig) {
   const permitClient = new PermitClient(config.permitConfig);
   let currentUser: User | undefined;
 
   return Prisma.defineExtension({
-    name: "permit-prisma",
+    name: "prisma-permit",
     client: {
       $permit: {
         client: permitClient,
@@ -53,10 +54,8 @@ export function createPermitClientExtension(config: PermitExtensionConfig) {
           if (!config.enableAutomaticChecks) {
             return query(args);
           }
-
-          console.log("🎉 config", model, query, operation, args);
-          if (config.debug) {
-            console.log(
+          if (config.permitConfig.debug) {
+            logger.info(
               `[Permit] Intercepting ${operation} operation on ${model}`
             );
           }
@@ -64,8 +63,8 @@ export function createPermitClientExtension(config: PermitExtensionConfig) {
           const user = currentUser;
 
           if (!user) {
-            if (config.debug) {
-              console.log(
+            if (config.permitConfig.debug) {
+              logger.info(
                 `[Permit] No user provided, skipping permission check`
               );
             }
@@ -76,8 +75,8 @@ export function createPermitClientExtension(config: PermitExtensionConfig) {
             config.excludedModels?.includes(model) ||
             config.excludedOperations?.includes(operation)
           ) {
-            if (config.debug) {
-              console.log(
+            if (config.permitConfig.debug) {
+              logger.info(
                 `[Permit] Skipping excluded model/operation: ${model}/${operation}`
               );
             }
@@ -90,14 +89,19 @@ export function createPermitClientExtension(config: PermitExtensionConfig) {
             config.resourceTypeMapping
           );
 
-          const resource = createResourceObject(resourceType, args, operation);
+          const resource = createResourceObject(
+            resourceType,
+            args,
+            operation,
+            config.accessControlModel
+          );
 
           const enrichedContext = config.contextEnricher
             ? config.contextEnricher(model, operation, args)
             : {};
 
-          if (config.debug) {
-            console.log(
+          if (config.permitConfig.debug) {
+            logger.info(
               `[Permit] Checking permission: ${
                 typeof user === "string" ? user : JSON.stringify(user)
               } -> ${action} -> ${
@@ -123,12 +127,11 @@ export function createPermitClientExtension(config: PermitExtensionConfig) {
                 : `${resource.type}${resource.key ? `:${resource.key}` : ""}`;
             const errorMessage = `Permission denied: User ${userStr} is not allowed to perform ${action} operation on ${resourceStr} resource`;
 
-            if (config.debug) {
-              console.log(`[Permit] ${errorMessage}`);
+            if (config.permitConfig.debug) {
+              logger.info(`[Permit] ${errorMessage}`);
             }
             throw new PermitError(errorMessage);
           }
-
           return query(args);
         },
       },

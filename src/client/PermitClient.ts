@@ -3,6 +3,7 @@ import { IPermitConfig } from "../types/IPermitConfig";
 import { User, Action, Resource, Context } from "../models/PermissionModels";
 import { PermitError } from "../utils/error";
 import { Permit } from "permitio";
+import logger from "../utils/logger";
 
 export class PermitClient implements IPermitClient {
   private permitInstance: Permit;
@@ -11,7 +12,6 @@ export class PermitClient implements IPermitClient {
   private initializationPromise: Promise<void> | null = null;
 
   constructor(config: IPermitConfig) {
-    console.log("💜 Config details", config);
     this.config = config;
 
     this.permitInstance = new Permit({
@@ -35,17 +35,17 @@ export class PermitClient implements IPermitClient {
    */
   private async initialize(): Promise<void> {
     try {
-      await this.permitInstance.check("system", "init", "system");
+      await this.permitInstance.api.tenants.list();
       this.initialized = true;
 
       if (this.config.debug) {
-        console.log("[Permit] SDK initialized successfully");
+        logger.info("Permit SDK initialized successfully");
       }
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : String(error);
       if (this.config.debug) {
-        console.error(`[Permit] Failed to initialize SDK: ${errorMessage}`);
+        logger.error(`Failed to initialize SDK: ${errorMessage}`);
       }
       this.initialized = false;
     }
@@ -66,9 +66,7 @@ export class PermitClient implements IPermitClient {
         throw error;
       }
       if (this.config.debug) {
-        console.error(
-          "[Permit] Operation attempted but SDK is not initialized"
-        );
+        logger.error("[Permit] Operation attempted but SDK is not initialized");
       }
     }
   }
@@ -87,7 +85,7 @@ export class PermitClient implements IPermitClient {
       await this.ensureInitialized();
 
       if (this.config.debug) {
-        console.log(
+        logger.info(
           `[Permit] Checking permission for user=${
             typeof user === "string" ? user : JSON.stringify(user)
           }, action=${action}, resource=${
@@ -104,9 +102,7 @@ export class PermitClient implements IPermitClient {
       );
 
       if (this.config.debug) {
-        console.log(
-          `[Permit] Permission result: ${allowed ? "ALLOWED" : "DENIED"}`
-        );
+        logger.info(`Permission result: ${allowed ? "ALLOWED" : "DENIED"}`);
       }
 
       return allowed;
@@ -116,7 +112,7 @@ export class PermitClient implements IPermitClient {
       const errorMessage = `Permission check failed: ${errorCause.message}`;
 
       if (this.config.debug) {
-        console.error(`[Permit] ${errorMessage}`);
+        logger.error(`[Permit] ${errorMessage}`);
       }
 
       if (this.config.throwOnError) {
@@ -148,7 +144,7 @@ export class PermitClient implements IPermitClient {
       const errorMessage = `Permission denied: User ${userStr} is not allowed to ${action} on ${resourceStr}`;
 
       if (this.config.debug) {
-        console.error(`[Permit] ${errorMessage}`);
+        logger.error(`[Permit] ${errorMessage}`);
       }
 
       throw new PermitError(errorMessage);

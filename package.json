@@ -1,28 +1,47 @@
 {
-  "name": "permit-prisma",
-  "version": "0.0.0",
-  "author": "",
-  "description": "",
+  "name": "@permitio/prisma-permit",
+  "version": "1.0.0",
+  "author": "Taofiq Aiyelabegan",
+  "description": "Prisma extension for integrating Permit.io authorization (RBAC, ABAC, ReBAC) into your Prisma application.",
   "keywords": [
     "prisma",
     "@prisma/client",
-    "extension"
+    "extension",
+    "permitio",
+    "permit",
+    "authorization",
+    "rbac",
+    "abac",
+    "rebac"
   ],
+  "license": "MIT",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/permitio/permit-prisma"
+  },
+  "homepage": "https://github.com/permitio/permit-prisma",
+  "bugs": {
+    "url": "https://github.com/permitio/permit-prisma/issues"
+  },
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "test": "jest"
   },
   "peerDependencies": {
     "@prisma/client": "latest"
   },
   "devDependencies": {
-    "@prisma/client": "latest",
     "@types/node": "^22.14.1",
     "prisma": "latest",
     "typescript": "4.9.4"
   },
   "dependencies": {
-    "permitio": "^2.7.4"
+    "permitio": "^2.7.4",
+    "winston": "^3.17.0"
   }
 }
