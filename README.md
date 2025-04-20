@@ -17,7 +17,7 @@ npm install @permitio/prisma-permit @prisma/client
 Make sure you have:
 
 - A Permit.io account. Sign up [here](https://app.permit.io) if you do not have one.
-- Permit's environment API key for your project (development/). See [here](https://docs.permit.io/api/api-with-cli/)
+- Permit's environment API key for your project (development/production). See [here](https://docs.permit.io/api/api-with-cli/)
 - A Policy Decision Point (PDP)
   - You can use Permit's hosted cloud PDP
   - Or run a local PDP container (default is `http://localhost:7766`, recommended for ABAC/ReBAC). Read more on running a Local Policy Check using the PDP [here](https://docs.permit.io/overview/perform-a-local-policy-check/)
