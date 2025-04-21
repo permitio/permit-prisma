@@ -65,59 +65,78 @@
 //     await prisma.$disconnect();
 //   });
 
+// import { PrismaClient } from "@prisma/client";
+// const prisma = new PrismaClient();
+
+// async function main() {
+//   // Upsert one project
+//   const project = await prisma.project.upsert({
+//     where: { id: "project-alpha" },
+//     update: {},
+//     create: {
+//       id: "project-alpha",
+//       name: "Alpha Project",
+//     },
+//   });
+
+//   // Upsert three tasks under that project
+//   await prisma.task.upsert({
+//     where: { id: "task-123" },
+//     update: {},
+//     create: {
+//       id: "task-123",
+//       title: "Fix Bug #42",
+//       projectId: project.id,
+//     },
+//   });
+
+//   await prisma.task.upsert({
+//     where: { id: "task-456" },
+//     update: {},
+//     create: {
+//       id: "task-456",
+//       title: "Implement Feature X",
+//       projectId: project.id,
+//     },
+//   });
+
+//   await prisma.task.upsert({
+//     where: { id: "task-789" },
+//     update: {},
+//     create: {
+//       id: "task-789",
+//       title: "Write Test Cases",
+//       projectId: project.id,
+//     },
+//   });
+
+//   console.log("✅ Seed complete: 1 project, 3 tasks");
+// }
+
+// main()
+//   .catch((e) => {
+//     console.error(e);
+//     process.exit(1);
+//   })
+//   .finally(async () => {
+//     await prisma.$disconnect();
+//   });
+
 import { PrismaClient } from "@prisma/client";
+
 const prisma = new PrismaClient();
 
-async function main() {
-  // Upsert one project
-  const project = await prisma.project.upsert({
-    where: { id: "project-alpha" },
-    update: {},
-    create: {
-      id: "project-alpha",
-      name: "Alpha Project",
+async function seed() {
+  await prisma.gDPRDocument.create({
+    data: {
+      title: "GDPR Document",
+      content: "Sensitive GDPR content",
+      data: "GDPR_protected",
     },
   });
-
-  // Upsert three tasks under that project
-  await prisma.task.upsert({
-    where: { id: "task-123" },
-    update: {},
-    create: {
-      id: "task-123",
-      title: "Fix Bug #42",
-      projectId: project.id,
-    },
-  });
-
-  await prisma.task.upsert({
-    where: { id: "task-456" },
-    update: {},
-    create: {
-      id: "task-456",
-      title: "Implement Feature X",
-      projectId: project.id,
-    },
-  });
-
-  await prisma.task.upsert({
-    where: { id: "task-789" },
-    update: {},
-    create: {
-      id: "task-789",
-      title: "Write Test Cases",
-      projectId: project.id,
-    },
-  });
-
-  console.log("✅ Seed complete: 1 project, 3 tasks");
+  console.log("Seeded GDPRDocument with data: GDPR_protected");
 }
 
-main()
-  .catch((e) => {
-    console.error(e);
-    process.exit(1);
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
+seed()
+  .catch((e) => console.error(e))
+  .finally(() => prisma.$disconnect());

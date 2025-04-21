@@ -3,9 +3,9 @@
   "scripts": {
     "dev": "ts-node --transpile-only index.ts",
     "seed": "ts-node prisma/seed.ts",
-    "test:abac": "ts-node abac-test.ts",
     "document:rbac": "ts-node rbac/document.ts",
     "invoice:abac": "ts-node abac/invoice.ts",
+    "gdpr:abac": "ts-node abac/gdpr.ts",
     "project-task:rebac": "ts-node rebac/project-task.ts"
   },
   "prisma": {
