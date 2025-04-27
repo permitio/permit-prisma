@@ -30,7 +30,8 @@
   },
   "scripts": {
     "build": "tsc",
-    "test": "jest"
+    "test": "jest",
+    "prepublishOnly": "npm run build"
   },
   "peerDependencies": {
     "@prisma/client": "latest"
