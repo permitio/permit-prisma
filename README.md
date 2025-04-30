@@ -21,7 +21,7 @@ Make sure you have:
 - A Policy Decision Point (PDP)
   - You can use Permit's hosted cloud PDP
   - Or run a local PDP container (default is `http://localhost:7766`, recommended for ABAC/ReBAC). Read more on running a Local Policy Check using the PDP [here](https://docs.permit.io/overview/perform-a-local-policy-check/)
-- Defined your resources, actions, and roles/policies in Permit.io's dashboard or API before using the extension
+- Define your resources, actions, roles and policies in Permit.io's dashboard or via the API before using the extension
 
 # Usage and Setup
 
@@ -29,16 +29,18 @@ To use the extension, import it and extend your Prisma Client instance:
 
 ```ts
 import { PrismaClient } from "@prisma/client";
-import { PermitExtension } from "@permitio/prisma-permit";
+import { createPermitClientExtension } from "@permitio/prisma-permit";
 
 const prisma = new PrismaClient().$extends(
-  PermitExtension({
-    token: "<YOUR_PERMIT_API_KEY>", // Permit.io API Key (required)
-    pdp: "http://localhost:7766", // PDP address (optional)
+  createPermitClientExtension({
+    permitConfig: {
+      token: "<YOUR_PERMIT_API_KEY>", // Permit.io API Key (required)
+      pdp: "http://localhost:7766", // PDP address
+    }
     accessControlModel: "RBAC", // Access control model: 'RBAC' | 'ABAC' | 'ReBAC'
     enableAutoSync: true, // Enable auto-sync of resource instances
     enableDataFiltering: false, // Enable automatic query filtering by permissions
-    enableAutomaticChecks: true,
+    enableAutomaticChecks: true, // Enable automatic checks
   })
 );
 ```
@@ -77,7 +79,6 @@ Below is a full summary of the configuration options you can pass to `PermitExte
 | `enableAutomaticChecks` | No       | `false`             | If `true`, automatically checks permissions on all Prisma queries and mutations, rejecting unauthorized actions.                                         |
 | `defaultTenant`         | No       | `'default'`         | The default tenant ID to use when syncing resource instances to Permit.                                                                                  |
 | `resourceTypeMapping`   | No       | `{}` (empty object) | A map of Prisma model names to Permit resource types. Useful when your model names differ from Permit’s resource types.                                  |
-| `debug`                 | No       | `false`             | If `true`, enables verbose logs for debugging Permit extension behavior.                                                                                 |
 | `excludedModels`        | No       | `[]`                | List of model names to skip from automatic permission checks.                                                                                            |
 | `excludedOperations`    | No       | `[]`                | List of operations to skip from automatic permission checks (e.g., `['createMany']`).                                                                    |
 | `transactionAware`      | No       | `false`             | Reserved for future use. Enables experimental support for permission checks inside Prisma transactions.                                                  |
@@ -133,10 +134,10 @@ Once configured, the extension adds **methods** to your Prisma client to perform
 
 ### Setting the Active User
 
-Before performing any authorized operations, you should identify which user is making the request. The extension provides `prisma.setUser(user)` to set the "current user" context on the Prisma client:
+Before performing any authorized operations, you should identify which user is making the request. The extension provides `prisma.$permit.setUser(user)` to set the "current user" context on the Prisma client:
 
 ```ts
-prisma.setUser(userId);
+prisma.$permit.setUser(userId);
 ```
 
 - `userId` is a unique identifier (string) for the user (must match the user key in Permit.io's system). You can call this at the start of a request (e.g., after verifying the user’s identity via auth). The user context will be used by the extension for subsequent checks and filtering.
@@ -149,10 +150,10 @@ Alternatively, if you prefer not to use a global context, you can directly suppl
 
 ### Checking Permissions (`check`)
 
-Use `prisma.check(action, resource, resourceInstance?)` to **check if the current user is allowed** to perform an action. It returns a boolean:
+Use `prisma.$permit.check(action, resource, resourceInstance?)` to **check if the current user is allowed** to perform an action. It returns a boolean:
 
 ```ts
-const canEdit = await prisma.check("edit", "Document", documentId);
+const canEdit = await prisma.$permit.check("edit", "Document", documentId);
 if (!canEdit) {
   // deny access (e.g., throw error or return 403)
 }
@@ -174,21 +175,21 @@ if (!canEdit) {
 - **RBAC/global check**:
 
   ```ts
-  prisma.check("create", "Document");
+  prisma.$permit.check("create", "Document");
   // checks if user can create a Document (any document, type-level permission)
   ```
 
 - **Instance check (ReBAC or contextual)**:
 
   ```ts
-  prisma.check("view", "Document", documentId);
+  prisma.$permit.check("view", "Document", documentId);
   // checks if user can view the specific document with id documentId
   ```
 
 - **Attribute-based check (ABAC)**: This can be similar to RBAC usage in code:
 
   ```ts
-  prisma.check("transfer", "Account", accountId);
+  prisma.$permit.check("transfer", "Account", accountId);
   ```
 
   But behind the scenes Permit will evaluate attributes (e.g., allow if account status is open and user’s clearance is high).
@@ -197,13 +198,13 @@ if (!canEdit) {
 
 ## Enforcing Permissions (`enforceCheck`)
 
-Often, you want to not just get a boolean, but immediately enforce the result by preventing the operation when not allowed. The `prisma.enforceCheck(action, resource, resourceInstance?)` method wraps check and throws an error if the permission check fails. This helps you fail fast:
+Often, you want to not just get a boolean, but immediately enforce the result by preventing the operation when not allowed. The `prisma.$permit.enforceCheck(action, resource, resourceInstance?)` method wraps check and throws an error if the permission check fails. This helps you fail fast:
 
 ```ts
-await prisma.enforceCheck("delete", "Document", documentId);
+await prisma.$permit.enforceCheck("delete", "Document", documentId);
 // If the above returns (no error), the user is allowed to delete this document.
 // Proceed to perform the deletion:
-await prisma.document.delete({ where: { id: documentId } });
+await prisma.permitdocument.delete({ where: { id: documentId } });
 ```
 
 If the user is not **permitted**, `enforceCheck` will throw (for example, an `UnauthorizedError` or a generic Error with a message indicating lack of permission). You can catch this error to return an HTTP 403 response or handle it appropriately. If the user **is permitted**, `enforceCheck` simply returns `true` (or resolves without error), allowing your code to continue.
@@ -217,7 +218,7 @@ Using `enforceCheck` ensures you never accidentally execute a Prisma operation w
 If `enableDataFiltering` is enabled in the extension configuration, **you don’t have to do anything special** to filter read queries – the extension will automatically apply a filter to your queries. For example:
 
 ```ts
-prisma.setUser(currentUserId);
+prisma.$permit.setUser(currentUserId);
 // Without specifying any extra filter, this will only return documents that the currentUserId is allowed to "read":
 const docs = await prisma.document.findMany();
 ```
@@ -227,7 +228,7 @@ When you call `findMany()` (or `findUnique`, etc.), the extension intercepts the
 If you did not enable automatic filtering, you can still achieve the same result manually using the extension’s helper function `getAllowedResourceIds`:
 
 ```ts
-const allowedIds = await prisma.getAllowedResourceIds("read", "Document");
+const allowedIds = await prisma.$permit.getAllowedResourceIds("read", "Document");
 // allowedIds is an array of document IDs the user can read
 const docs = await prisma.document.findMany({
   where: { id: { in: allowedIds } },
@@ -279,10 +280,10 @@ With Permit.io, you could define:
 After setting up those policies, using Prisma Permit extension:
 
 ```ts
-prisma.setUser(currentUserId);
+prisma.$permit.setUser(currentUserId);
 
 // Enforce permission before updating a project
-await prisma.enforceCheck("update", "project", projectId);
+await prisma.$permit.enforceCheck("update", "project", projectId);
 
 // If no error, safe to proceed
 await prisma.project.update({
@@ -308,6 +309,6 @@ In the create/update/delete operations, `enforceCheck` ensures that if the user 
 
 - **Supported Prisma Operations**: This extension works with Prisma Client queries. It uses Prisma’s `$extends` API under the hood to wrap query execution. It should support `.findUnique`, `.findMany`, `.create`, `.update`, `.delete`, and any other relevant methods. For aggregated queries or raw SQL, you will need to manually enforce permissions (the extension cannot intercept raw queries).
 
-- **Resources and Actions Setup**: Remember to configure your resources and actions in Permit.io to match your usage. The extension does not create resource types or define what “read”/“update” means – that’s up to your Permit.io configuration. For instance, if you use `prisma.check('publish', 'Post')`, ensure “publish” is an action on the “post” resource in your Permit setup, otherwise the check will always return false.
+- **Resources and Actions Setup**: Remember to configure your resources and actions in Permit.io to match your usage. The extension does not create resource types or define what “read”/“update” means – that’s up to your Permit.io configuration. For instance, if you use `prisma.$permit.check('publish', 'Post')`, ensure “publish” is an action on the “post” resource in your Permit setup, otherwise the check will always return false.
 
 - **References**: For more on Permit.io’s Node.js SDK and its capabilities (which this extension leverages), see the [Permit.io Node.js SDK docs](https://github.com/permitio/permit-node) and the [`permit.check()` API reference](https://docs.permit.io). Understanding how Permit handles policy decisions will help you design your authorization logic effectively.
