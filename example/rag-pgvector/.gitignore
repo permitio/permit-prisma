@@ -1,0 +1,10 @@
+.env
+.DS_Store
+*.log
+node_modules
+dist
+dist/
+prisma/generated/
+prisma/generated/**
+prisma/prisma/generated/
+prisma/prisma/generated/**

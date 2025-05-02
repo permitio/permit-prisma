@@ -1,0 +1,32 @@
+{
+  "name": "rag-pgvector",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "ts-node index.ts",
+    "dev": "nodemon --watch '*.ts' --exec 'ts-node' index.ts",
+    "generate": "prisma generate",
+    "migrate:dev": "npm run generate && prisma migrate dev"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@permitio/prisma-permit": "file:../..",
+    "@prisma/client": "^6.7.0",
+    "dotenv": "^16.5.0",
+    "openai": "^4.96.2",
+    "pg": "^8.15.6",
+    "pgvector": "^0.2.0",
+    "uuid": "^11.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.3",
+    "nodemon": "^3.1.10",
+    "prisma": "^6.7.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
+  }
+}

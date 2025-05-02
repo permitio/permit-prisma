@@ -1,0 +1,40 @@
+
+services:
+  db:
+    image: ankane/pgvector
+    container_name: rag_pgvector_db
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+     POSTGRES_USER: postgres
+     POSTGRES_PASSWORD: postgres
+     POSTGRES_DB: ragdb
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      retries: 5
+    volumes:
+      - db:/var/lib/postgresql/data
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: rag_pgvector_app
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: "postgresql://postgres:postgres@db:5432/ragdb"
+      OPENAI_API_KEY: "${OPENAI_API_KEY}"
+      PERMIT_API_KEY: "${PERMIT_API_KEY}"
+      PERMIT_PDP_URL: "${PERMIT_PDP_URL}"
+    volumes:
+      - ./:/usr/src/app
+    working_dir: /usr/src/app
+    command: >
+      sh -c "npx prisma migrate dev --name init && npm run dev"
+    ports:
+      - "3001:3001"
+volumes:
+  db:
