@@ -122,21 +122,159 @@
 //     await prisma.$disconnect();
 //   });
 
-import { PrismaClient } from "@prisma/client";
+// import { PrismaClient } from "@prisma/client";
 
+// const prisma = new PrismaClient();
+
+// async function seed() {
+//   await prisma.gDPRDocument.create({
+//     data: {
+//       title: "GDPR Document",
+//       content: "Sensitive GDPR content",
+//       data: "GDPR_protected",
+//     },
+//   });
+//   console.log("Seeded GDPRDocument with data: GDPR_protected");
+// }
+
+// seed()
+//   .catch((e) => console.error(e))
+//   .finally(() => prisma.$disconnect());
+
+
+// import { PrismaClient } from '@prisma/client';
+// const prisma = new PrismaClient();
+
+// async function main() {
+//   const blogs = [
+//     {
+//       title: 'Admin Blog Post 1',
+//       content: 'This is a post created by the admin user',
+//       published: true,
+//       authorId: 'user1@permit.io'
+//     },
+//     {
+//       title: 'Admin Blog Post 2',
+//       content: 'Another post by the admin',
+//       published: false,
+//       authorId: 'user1@permit.io'
+//     },
+//     {
+//       title: 'Editor Blog Post',
+//       content: 'Content created by an editor',
+//       published: true,
+//       authorId: 'user2@permit.io'
+//     },
+//     {
+//       title: 'Another Editor Post',
+//       content: 'More content from an editor',
+//       published: true,
+//       authorId: 'user2@permit.io'
+//     },
+//     {
+//       title: 'Draft Editor Post',
+//       content: 'Unpublished content',
+//       published: false,
+//       authorId: 'user2@permit.io'
+//     }
+//   ];
+
+//   console.log('Seeding blog data...');
+  
+//   for (const blog of blogs) {
+//     await prisma.blog.create({
+//       data: blog
+//     });
+//   }
+
+//   console.log('Seeding completed successfully!');
+// }
+
+// main()
+//   .catch((e) => {
+//     console.error('Error during seeding:', e);
+//     process.exit(1);
+//   })
+//   .finally(async () => {
+//     await prisma.$disconnect();
+//   });
+
+
+import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
-async function seed() {
-  await prisma.gDPRDocument.create({
-    data: {
-      title: "GDPR Document",
-      content: "Sensitive GDPR content",
-      data: "GDPR_protected",
+async function main() {
+  console.log('Seeding file data...');
+  
+  // Clear existing data
+  await prisma.file.deleteMany({});
+  
+  // Define test data
+  const files = [
+    // Public files
+    {
+      title: 'Public Announcement',
+      content: 'This is a public announcement for everyone',
+      visibility: 'public',
+      departmentId: 'marketing',
+      ownerId: 'senior_manager@example.com'
     },
-  });
-  console.log("Seeded GDPRDocument with data: GDPR_protected");
+    {
+      title: 'Employee Handbook',
+      content: 'General guidelines for all employees',
+      visibility: 'public',
+      departmentId: 'hr',
+      ownerId: 'employee@example.com'
+    },
+    
+    // Internal files
+    {
+      title: 'Marketing Strategy',
+      content: 'Internal marketing department strategy',
+      visibility: 'internal',
+      departmentId: 'marketing',
+      ownerId: 'employee@example.com'
+    },
+    {
+      title: 'HR Policy Updates',
+      content: 'Internal HR department updates',
+      visibility: 'internal',
+      departmentId: 'hr',
+      ownerId: 'senior_manager@example.com'
+    },
+    
+    // Confidential files
+    {
+      title: 'Financial Forecasts',
+      content: 'Confidential financial projections',
+      visibility: 'confidential',
+      departmentId: 'finance',
+      ownerId: 'senior_manager@example.com'
+    },
+    {
+      title: 'Personal File',
+      content: 'Private content owned by file owner',
+      visibility: 'confidential',
+      departmentId: 'marketing',
+      ownerId: 'file_owner@example.com'
+    }
+  ];
+  
+  // Insert data
+  for (const file of files) {
+    await prisma.file.create({
+      data: file
+    });
+  }
+
+  console.log('Seeding completed successfully!');
 }
 
-seed()
-  .catch((e) => console.error(e))
-  .finally(() => prisma.$disconnect());
+main()
+  .catch((e) => {
+    console.error('Error during seeding:', e);
+    process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });

@@ -10,11 +10,6 @@ export type Resource =
     };
 export type Context = Record<string, any>;
 
-export interface CheckResult {
-  allowed: boolean;
-  reason?: string;
-}
-
 export enum AccessControlModel {
   RBAC = "rbac",
   ABAC = "abac",

@@ -4,8 +4,10 @@
     "dev": "ts-node --transpile-only index.ts",
     "seed": "ts-node prisma/seed.ts",
     "document:rbac": "ts-node rbac/document.ts",
+    "blog:rbac": "ts-node rbac/blog.ts",
     "invoice:abac": "ts-node abac/invoice.ts",
     "gdpr:abac": "ts-node abac/gdpr.ts",
+    "file:abac": "ts-node abac/file.ts",
     "project-task:rebac": "ts-node rebac/project-task.ts"
   },
   "prisma": {

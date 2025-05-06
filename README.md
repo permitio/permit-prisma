@@ -47,22 +47,32 @@ const prisma = new PrismaClient().$extends(
 
 ### In the above setup:
 
-- `token` is your secret API key for Permit (required). This connects the extension to Permit’s policy engine.
-- `pdp` is the URL of the Permit Policy Decision Point service. If you’re using Permit’s cloud or default local PDP, you can set this (defaults to `http://localhost:7766` or appropriate URL).
-- `accessControlModel` specifies the permission model you use: Role-Based (RBAC), Attribute-Based (ABAC), or Relationship-Based (ReBAC). The extension will work with any model, but this flag can be used to adjust behavior or simply document intent.
+- `permitConfig` is the object containing all Permit.io SDK configuration parameters:
+  - `permitConfig.token` is your secret API key for Permit (required). This connects the extension to Permit's policy engine.
+  - `permitConfig.pdp` is the URL of the Permit Policy Decision Point service. For local development, it defaults to `http://localhost:7766`. For production with Permit's cloud PDP, this will be automatically configured when using your API token.
+  - `permitConfig.debug` (optional): Set to `true` to enable detailed logging from the Permit SDK.
+- `accessControlModel` (required for optimal behavior): Specifies which permission model you're using: Role-Based (`"rbac"`), Attribute-Based (`"abac"`), or Relationship-Based (`"rebac"`). This setting is crucial as it determines:
+  - How permission checks are formatted
+  - What data is included in permission requests
+  - How resource instances are synchronized with Permit
+  
+  While the extension will default to basic RBAC behavior if not specified, you should **always set this explicitly** to match your Permit.io policy configuration for correct operation.
+  
+  Examples:
+  - Set to `"rbac"` if using simple role-based permissions
+  - Set to `"abac"` if using attribute-based conditions in your policies
+  - Set to `"rebac"` if using relationship-based or instance-level permissions
 - `enableAutoSync` if `true`, the extension will automatically sync created/updated/deleted Prisma records to Permit.io as resource instances (including their attributes) for you. This ensures Permit’s data is up-to-date for permission checks (especially important for ABAC and ReBAC scenarios).
 - `enableDataFiltering` if `true`, read queries (find, findMany) are automatically filtered so that only records the active user is permitted to access are returned. If `false`, you can still manually filter using provided methods.
+- `enableAutomaticChecks` (default: `false`): If set to `true`, enables automatic permission checks for each Prisma operation. If `false`, you'll need to handle permission checks manually using the extension's methods (like `prisma.$permit.check()` or `prisma.$permit.enforceCheck()`).
 
 ---
 
 ### Additional Configuration Options
-
-- `enableAutomaticChecks` (default: `false`): If set to `true`, enables automatic permission checks for each Prisma operation. If `false`, you’ll need to handle permission checks manually using the SDK.
 - `defaultTenant` (default: `"default"`): The tenant key to associate with synced resources. Useful in multi-tenant applications.
 - `resourceTypeMapping` (optional): A custom map from Prisma model names to Permit resource types. Useful if your model names don't match your Permit resource keys.
 - `excludedModels` (optional): An array of model names to skip from permission checks or syncing.
 - `excludedOperations` (optional): An array of Prisma operations to skip from checking (e.g., `['findFirst']`).
-- `transactionAware` (currently unused): Reserved for future support to manage checks across multi-operation transactions.
 
 You can mix and match these configurations to fine-tune how the extension behaves in your app.
 
@@ -81,7 +91,6 @@ Below is a full summary of the configuration options you can pass to `PermitExte
 | `resourceTypeMapping`   | No       | `{}` (empty object) | A map of Prisma model names to Permit resource types. Useful when your model names differ from Permit’s resource types.                                  |
 | `excludedModels`        | No       | `[]`                | List of model names to skip from automatic permission checks.                                                                                            |
 | `excludedOperations`    | No       | `[]`                | List of operations to skip from automatic permission checks (e.g., `['createMany']`).                                                                    |
-| `transactionAware`      | No       | `false`             | Reserved for future use. Enables experimental support for permission checks inside Prisma transactions.                                                  |
 
 ### Notes
 

@@ -8,9 +8,7 @@ export interface PermitExtensionConfig {
   enableDataFiltering?: boolean;
   defaultTenant?: string;
   resourceTypeMapping?: Record<string, string>;
-  debug?: boolean;
   accessControlModel?: AccessControlModel;
   excludedModels?: string[];
   excludedOperations?: string[];
-  transactionAware?: boolean;
 }
