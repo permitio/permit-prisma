@@ -1,7 +1,7 @@
 {
   "name": "@permitio/prisma-permit",
-  "version": "1.0.0",
-  "author": "Taofiq Aiyelabegan",
+  "version": "0.0.1",
+  "author": "Permit.io",
   "description": "Prisma extension for integrating Permit.io authorization (RBAC, ABAC, ReBAC) into your Prisma application.",
   "keywords": [
     "prisma",
