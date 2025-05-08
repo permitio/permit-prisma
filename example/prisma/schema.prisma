@@ -20,17 +20,42 @@ model Blog {
   updatedAt DateTime @updatedAt
 }
 
-model File {
-  id           String   @id @default(uuid())
-  title        String
-  content      String
-  visibility   String   // "public", "internal", or "confidential"
-  departmentId String   // For department-matching condition
-  ownerId      String   // For file ownership condition
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+model Project {
+  id        String   @id @default(uuid())
+  name      String
+  status    String   // "draft", "active", or "completed"
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
+// model File {
+//   id           String   @id @default(uuid())
+//   title        String
+//   content      String
+//   visibility   String   // "public", "internal", or "confidential"
+//   departmentId String   // For department-matching condition
+//   ownerId      String   // For file ownership condition
+//   createdAt    DateTime @default(now())
+//   updatedAt    DateTime @updatedAt
+// }
+
+model Folder {
+  id        String   @id @default(uuid())
+  name      String
+  files     File[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model File {
+  id        String   @id @default(uuid())
+  name      String
+  content   String?
+  folderId  String
+  folder    Folder   @relation(fields: [folderId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
 // model Post {
 //   id        Int      @id @default(autoincrement())
 //   title     String

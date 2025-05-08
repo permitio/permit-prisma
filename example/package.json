@@ -8,7 +8,10 @@
     "invoice:abac": "ts-node abac/invoice.ts",
     "gdpr:abac": "ts-node abac/gdpr.ts",
     "file:abac": "ts-node abac/file.ts",
-    "project-task:rebac": "ts-node rebac/project-task.ts"
+    "project-task:rebac": "ts-node rebac/project-task.ts",
+    "file-folder:rebac": "ts-node rebac/file-folder.ts",
+    "rebac-post-fetch-filter": "ts-node rebac/rebac-post-fetch-filtering.ts",
+    "project-filtering": "ts-node abac/project-filtering.ts"
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"

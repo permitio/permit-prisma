@@ -64,6 +64,23 @@ export function createPermitClientExtension(config: PermitExtensionConfig) {
             action
           );
         },
+        async filterQueryResults(
+          action: Action,
+          resourceType: string,
+          results: any[]
+        ): Promise<any[]> {
+          if (!currentUser) {
+            throw new PermitError("No user set for permission filtering");
+          }
+
+          const resources = results.map(result => ({
+            type: resourceType,
+            id: result.id,
+            attributes: result
+          }));
+          
+          return permitClient.filterObjects(currentUser, action, resources);
+        }      
       },
     },
     query: {

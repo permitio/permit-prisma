@@ -187,6 +187,29 @@ export class PermitClient implements IPermitClient {
     return allowedKeys;
   }
 
+  async filterObjects(
+    user: User,
+    action: Action,
+    resources: Array<any>
+  ): Promise<Array<any>> {
+    await this.ensureInitialized();
+    
+    const checkRequests = resources.map(resource => ({
+      user: user,
+      action: action,
+     resource: `${resource.type}:${resource.id}`,
+     context: {
+      resourceAttributes: resource.attributes
+    }
+    }));
+
+    const results = await this.permitInstance.bulkCheck(checkRequests);
+    
+    const allowedResources = resources.filter((resource, index) => results[index]);
+    
+    return allowedResources;
+  }
+
   async syncResourceInstanceCreate(
     resourceType: string,
     resourceKey: string,

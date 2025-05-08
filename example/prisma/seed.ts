@@ -200,74 +200,272 @@
 //   });
 
 
-import { PrismaClient } from '@prisma/client';
+// import { PrismaClient } from '@prisma/client';
+// const prisma = new PrismaClient();
+
+// async function main() {
+//   console.log('Seeding file data...');
+  
+//   // Clear existing data
+//   await prisma.file.deleteMany({});
+  
+//   // Define test data
+//   const files = [
+//     // Public files
+//     {
+//       title: 'Public Announcement',
+//       content: 'This is a public announcement for everyone',
+//       visibility: 'public',
+//       departmentId: 'marketing',
+//       ownerId: 'senior_manager@example.com'
+//     },
+//     {
+//       title: 'Employee Handbook',
+//       content: 'General guidelines for all employees',
+//       visibility: 'public',
+//       departmentId: 'hr',
+//       ownerId: 'employee@example.com'
+//     },
+    
+//     // Internal files
+//     {
+//       title: 'Marketing Strategy',
+//       content: 'Internal marketing department strategy',
+//       visibility: 'internal',
+//       departmentId: 'marketing',
+//       ownerId: 'employee@example.com'
+//     },
+//     {
+//       title: 'HR Policy Updates',
+//       content: 'Internal HR department updates',
+//       visibility: 'internal',
+//       departmentId: 'hr',
+//       ownerId: 'senior_manager@example.com'
+//     },
+    
+//     // Confidential files
+//     {
+//       title: 'Financial Forecasts',
+//       content: 'Confidential financial projections',
+//       visibility: 'confidential',
+//       departmentId: 'finance',
+//       ownerId: 'senior_manager@example.com'
+//     },
+//     {
+//       title: 'Personal File',
+//       content: 'Private content owned by file owner',
+//       visibility: 'confidential',
+//       departmentId: 'marketing',
+//       ownerId: 'file_owner@example.com'
+//     }
+//   ];
+  
+//   // Insert data
+//   for (const file of files) {
+//     await prisma.file.create({
+//       data: file
+//     });
+//   }
+
+//   console.log('Seeding completed successfully!');
+// }
+
+// main()
+//   .catch((e) => {
+//     console.error('Error during seeding:', e);
+//     process.exit(1);
+//   })
+//   .finally(async () => {
+//     await prisma.$disconnect();
+//   });
+
+// prisma/seed.ts
+// import { PrismaClient } from '@prisma/client';
+// const prisma = new PrismaClient();
+
+// async function main() {
+//   console.log('Seeding file-folder structure...');
+  
+//   // Clear existing data
+//   await prisma.file.deleteMany({});
+//   await prisma.folder.deleteMany({});
+  
+//   // Create folders
+//   const marketing = await prisma.folder.create({
+//     data: {
+//       id: 'marketing', // Use the same IDs as in Permit.io
+//       name: 'Marketing'
+//     }
+//   });
+  
+//   const finance = await prisma.folder.create({
+//     data: {
+//       id: 'finance',
+//       name: 'Finance'
+//     }
+//   });
+  
+//   const hr = await prisma.folder.create({
+//     data: {
+//       id: 'HR',
+//       name: 'Human Resources'
+//     }
+//   });
+  
+//   const publicFolder = await prisma.folder.create({
+//     data: {
+//       id: 'public',
+//       name: 'Public'
+//     }
+//   });
+
+//   // Create files
+//   await prisma.file.create({
+//     data: {
+//       id: 'Marketing_Plan2024', // Use the same IDs as in Permit.io
+//       name: 'Marketing Plan 2024',
+//       content: 'Marketing strategy for 2024',
+//       folderId: marketing.id
+//     }
+//   });
+
+//   await prisma.file.create({
+//     data: {
+//       id: 'Brand_Guidelines',
+//       name: 'Brand Guidelines',
+//       content: 'Company brand guidelines',
+//       folderId: marketing.id
+//     }
+//   });
+
+//   await prisma.file.create({
+//     data: {
+//       id: 'Q2_Budget',
+//       name: 'Q2 Budget',
+//       content: 'Financial budget for Q2',
+//       folderId: finance.id
+//     }
+//   });
+
+//   await prisma.file.create({
+//     data: {
+//       id: 'Tax_Documents',
+//       name: 'Tax Documents',
+//       content: 'Important tax documentation',
+//       folderId: finance.id
+//     }
+//   });
+
+//   await prisma.file.create({
+//     data: {
+//       id: 'Employee_Handbook',
+//       name: 'Employee Handbook',
+//       content: 'Guide for all employees',
+//       folderId: hr.id
+//     }
+//   });
+
+//   await prisma.file.create({
+//     data: {
+//       id: 'Recruitment_Plan',
+//       name: 'Recruitment Plan',
+//       content: 'Strategy for hiring new talent',
+//       folderId: hr.id
+//     }
+//   });
+
+//   await prisma.file.create({
+//     data: {
+//       id: 'Company_Overview',
+//       name: 'Company Overview',
+//       content: 'Public company information',
+//       folderId: publicFolder.id
+//     }
+//   });
+
+//   await prisma.file.create({
+//     data: {
+//       id: 'Annual_Report',
+//       name: 'Annual Report',
+//       content: 'Annual company report',
+//       folderId: publicFolder.id
+//     }
+//   });
+
+//   console.log('Seeding completed successfully!');
+// }
+
+// main()
+//   .catch((e) => {
+//     console.error('Error during seeding:', e);
+//     process.exit(1);
+//   })
+//   .finally(async () => {
+//     await prisma.$disconnect();
+//   });
+
+
+// prisma/seed.ts
+import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('Seeding file data...');
+  console.log('Seeding project data for ABAC testing...');
   
   // Clear existing data
-  await prisma.file.deleteMany({});
+  await prisma.project.deleteMany({});
   
-  // Define test data
-  const files = [
-    // Public files
+  // Create projects with different statuses
+  const projects = [
     {
-      title: 'Public Announcement',
-      content: 'This is a public announcement for everyone',
-      visibility: 'public',
-      departmentId: 'marketing',
-      ownerId: 'senior_manager@example.com'
+      id: "project-draft-1",
+      name: "Marketing Campaign Planning",
+      status: "draft"
     },
     {
-      title: 'Employee Handbook',
-      content: 'General guidelines for all employees',
-      visibility: 'public',
-      departmentId: 'hr',
-      ownerId: 'employee@example.com'
-    },
-    
-    // Internal files
-    {
-      title: 'Marketing Strategy',
-      content: 'Internal marketing department strategy',
-      visibility: 'internal',
-      departmentId: 'marketing',
-      ownerId: 'employee@example.com'
+      id: "project-draft-2",
+      name: "New Product Roadmap",
+      status: "draft"
     },
     {
-      title: 'HR Policy Updates',
-      content: 'Internal HR department updates',
-      visibility: 'internal',
-      departmentId: 'hr',
-      ownerId: 'senior_manager@example.com'
-    },
-    
-    // Confidential files
-    {
-      title: 'Financial Forecasts',
-      content: 'Confidential financial projections',
-      visibility: 'confidential',
-      departmentId: 'finance',
-      ownerId: 'senior_manager@example.com'
+      id: "project-active-1",
+      name: "Website Redesign",
+      status: "active"
     },
     {
-      title: 'Personal File',
-      content: 'Private content owned by file owner',
-      visibility: 'confidential',
-      departmentId: 'marketing',
-      ownerId: 'file_owner@example.com'
+      id: "project-active-2",
+      name: "Mobile App Development",
+      status: "active"
+    },
+    {
+      id: "project-completed-1",
+      name: "Q1 Sales Report",
+      status: "completed"
+    },
+    {
+      id: "project-completed-2",
+      name: "Employee Training Program",
+      status: "completed"
     }
   ];
   
-  // Insert data
-  for (const file of files) {
-    await prisma.file.create({
-      data: file
+  // Insert projects
+  for (const project of projects) {
+    await prisma.project.create({
+      data: project
     });
   }
 
-  console.log('Seeding completed successfully!');
+  console.log('✅ Projects seeded successfully!');
+  
+  // Log the seeded data
+  const seededProjects = await prisma.project.findMany();
+  console.log(`Created ${seededProjects.length} projects:`);
+  console.table(seededProjects.map(p => ({
+    id: p.id,
+    name: p.name,
+    status: p.status
+  })));
 }
 
 main()
