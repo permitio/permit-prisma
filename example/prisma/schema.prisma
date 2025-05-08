@@ -28,6 +28,15 @@ model Project {
   updatedAt DateTime @updatedAt
 }
 
+model Document {
+  id        String   @id @default(uuid())
+  title     String
+  content   String
+  ownerId   String   // This field maps to the owner relationship
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 // model File {
 //   id           String   @id @default(uuid())
 //   title        String

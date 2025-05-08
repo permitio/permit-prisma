@@ -11,7 +11,8 @@
     "project-task:rebac": "ts-node rebac/project-task.ts",
     "file-folder:rebac": "ts-node rebac/file-folder.ts",
     "rebac-post-fetch-filter": "ts-node rebac/rebac-post-fetch-filtering.ts",
-    "project-filtering": "ts-node abac/project-filtering.ts"
+    "project-filtering": "ts-node abac/project-filtering.ts",
+    "document-ownership": "ts-node rebac/document-ownership.ts"
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"

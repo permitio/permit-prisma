@@ -1,8 +1,13 @@
 # Prisma Permit – Fine-Grained Authorization Extension for Prisma
 
-Prisma Permit (`@permitio/prisma-permit`) is a Prisma Client extension that integrates Permit.io's fine-grained access control into your database queries. It enables role-based, attribute-based, and relationship-based access checks (RBAC, ABAC, ReBAC) directly through the Prisma Client, helping secure your application at the data layer. By using this extension, you ensure that every database operation is authorized according to central policies defined in Permit.io.
+Prisma Permit (`@permitio/prisma-permit`) is a Prisma Client extension that integrates Permit.io's fine-grained access control into your database queries. It enables role-based, attribute-based, and relationship-based access checks (RBAC, ABAC, ReBAC) directly through the Prisma Client, securing your application at the data layer. By using this extension, you ensure that every database operation is authorized according to central policies defined in Permit.io.
 
-Prisma is a powerful ORM but **does not provide built-in fine-grained authorization controls**. As your application scales, you need stricter control over who can create, read, update, or delete specific data. This extension addresses that gap by enforcing permission checks and filtering data as part of Prisma queries.
+The extension implements three key capabilities:
+- **Direct permission checks**: Check if users are authorized to perform specific actions on resources before executing database operations
+- **Permission filtering**: Automatically restrict database queries so users only see data they're authorized to access
+- **Resource synchronization**: Keep your Permit.io policy engine in sync with your database by automatically ingesting resource instances and their relationships
+
+Prisma is a powerful ORM but **does not provide built-in fine-grained authorization controls**. As your application scales, you need stricter control over who can create, read, update, or delete specific data. This extension addresses that gap by enforcing permission checks and filtering data as part of Prisma queries, while maintaining a clean separation between your data access and authorization logic.
 
 ## Installation
 
