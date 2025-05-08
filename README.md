@@ -148,6 +148,7 @@ createPermitClientExtension({
   enableAutoSync: true,
   enableDataFiltering: true
 })
+```
 
 ## Access Control Models
 
