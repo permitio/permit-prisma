@@ -11,7 +11,7 @@ Prisma is a powerful ORM but **does not provide built-in fine-grained authorizat
 
 ## Installation
 
-Install the package (alongside prisma client package) from npm:
+Install the package (alongside the prisma client package) from npm:
 
 ```bash
 npm install @permitio/prisma-permit @prisma/client
@@ -26,7 +26,7 @@ Make sure you have:
 - A Policy Decision Point (PDP)
   - You can use Permit's hosted cloud PDP
   - Or run a local PDP container (default is `http://localhost:7766`, recommended for ABAC/ReBAC). Read more on running a Local Policy Check using the PDP [here](https://docs.permit.io/overview/perform-a-local-policy-check/)
-- Define your resources, actions, roles and policies in Permit.io's dashboard or via the API before using the extension
+- Define your resources, actions, roles, and policies in Permit.io's dashboard or via the API before using the extension
 
 # Usage and Setup
 
@@ -59,7 +59,7 @@ const prisma = new PrismaClient().$extends(
 - `accessControlModel` (required for optimal behavior): Specifies which permission model you're using: Role-Based (`"rbac"`), Attribute-Based (`"abac"`), or Relationship-Based (`"rebac"`). This setting is crucial as it determines:
   - How permission checks are formatted
   - What data is included in permission requests
-  - How resource instances are synchronized with Permit
+  - How resource instances are synchronized with Permit.io
   
   While the extension will default to basic RBAC behavior if not specified, you should **always set this explicitly** to match your Permit.io policy configuration for correct operation.
   
@@ -68,14 +68,14 @@ const prisma = new PrismaClient().$extends(
   - Set to `"abac"` if using attribute-based conditions in your policies
   - Set to `"rebac"` if using relationship-based or instance-level permissions
 - `enableAutoSync` if `true`, the extension will automatically sync created/updated/deleted Prisma records to Permit.io as resource instances (including their attributes) for you. This ensures Permit’s data is up-to-date for permission checks (especially important for ABAC and ReBAC scenarios).
-- `enableDataFiltering` if `true`, read queries (find, findMany) are automatically filtered so that only records the active user is permitted to access are returned. If `false`, you can still manually filter using provided methods.
-- `enableAutomaticChecks` (default: `false`): If set to `true`, enables automatic permission checks for each Prisma operation. If `false`, you'll need to handle permission checks manually using the extension's methods (like `prisma.$permit.check()` or `prisma.$permit.enforceCheck()`).
+- `enableDataFiltering` if `true`, read queries (find, findMany) are automatically filtered so that only records that the active user is permitted to access are returned. If `false`, you can still manually filter using the provided methods.
+- `enableAutomaticChecks` (default: `false`): If set to `true`, automatic permission checks for each Prisma operation are enabled. If `false`, you'll need to handle permission checks manually using the extension's methods (like `prisma.$permit.check()` or `prisma.$permit.enforceCheck()`).
 
 ---
 
 ### Additional Configuration Options
-- `defaultTenant` (default: `"default"`): The tenant key to associate with synced resources. Useful in multi-tenant applications.
-- `resourceTypeMapping` (optional): A custom map from Prisma model names to Permit resource types. Useful if your model names don't match your Permit resource keys.
+- `defaultTenant` (default: `"default"): The tenant key associated with synced resources. This is useful in multi-tenant applications.
+- `resourceTypeMapping` (optional): A custom map from Prisma model names to Permit resource types. This is useful if your model names don't match your Permit resource keys.
 - `excludedModels` (optional): An array of model names to skip from permission checks or syncing.
 - `excludedOperations` (optional): An array of Prisma operations to skip from checking (e.g., `['findFirst']`).
 
@@ -89,17 +89,17 @@ Below is a full summary of the configuration options you can pass to `PermitExte
 | ----------------------- | -------- | ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `permitConfig`          | Yes      | _None_              | The Permit.io SDK config object. Must include `token`, `pdp`, and other core settings. See `IPermitConfig`.                                              |
 | `accessControlModel`    | No       | `'rbac'`            | Defines the access control strategy. Can be `'rbac'`, `'abac'`, or `'rebac'`. Determines how permissions are enforced.                                   |
-| `enableAutoSync`        | No       | `false`             | If `true`, resource instances (e.g., rows) are automatically synced with Permit.io on create/update/delete. Required for ReBAC and ABAC to stay in sync. |
+| `enableAutoSync`        | No       | `false`             | If `true`, resource instances (e.g., rows) are automatically synced with Permit.io on create/update/delete. ReBAC and ABAC are required to stay in sync. |
 | `enableDataFiltering`   | No       | `false`             | If `true`, adds row-level filtering on `findMany()` queries to return only records the user has access to (ReBAC only).                                  |
 | `enableAutomaticChecks` | No       | `false`             | If `true`, automatically checks permissions on all Prisma queries and mutations, rejecting unauthorized actions.                                         |
-| `defaultTenant`         | No       | `'default'`         | The default tenant ID to use when syncing resource instances to Permit.                                                                                  |
+| `defaultTenant`         | No       | `'default'`         | The default tenant ID is to be used when syncing resource instances to Permit.                                                                                  |
 | `resourceTypeMapping`   | No       | `{}` (empty object) | A map of Prisma model names to Permit resource types. Useful when your model names differ from Permit’s resource types.                                  |
 | `excludedModels`        | No       | `[]`                | List of model names to skip from automatic permission checks.                                                                                            |
 | `excludedOperations`    | No       | `[]`                | List of operations to skip from automatic permission checks (e.g., `['createMany']`).                                                                    |
 
 ### Notes
 
-- At a minimum, `permitConfig.token` and `permitConfig.pdp` are required to use the extension.
+- To use the extension, a minimum of `permitConfig.token` and `permitConfig.pdp` is required.
 - Set `accessControlModel` to `'rebac'` if you're using relationship-based permissions and want instance filtering + syncing.
 - You can mix and match `enableAutoSync` and `enableDataFiltering` based on your needs.
 - `enableAutomaticChecks` is required if you want the extension to enforce access control across all queries and mutations.
@@ -142,7 +142,7 @@ With Prisma Permit, if you use ReBAC, you will likely attach users to resources 
 
 ## Using the Prisma Permit Extension
 
-Once configured, the extension adds **methods** to your Prisma client to perform permission checks and management. It also can intercept queries if you enabled auto-sync or filtering. Below are the key usage patterns:
+Once configured, the extension adds **methods** to your Prisma client to perform permission checks and management. It can also intercept queries if you have enabled auto-sync or filtering. Below are the key usage patterns:
 
 ---
 
@@ -180,7 +180,7 @@ if (!canEdit) {
 - **resource**: the resource type or identifier. You can pass a resource type name (string) or a specific resource instance. For a resource instance, you have two options:
 
   - **Concatenated string**: `"resourceType:instanceKey"`, e.g., `"Document:doc_123"`.
-  - **Separate arguments**: pass the resource type as first argument and the instance ID/key as second (as shown above). If a third argument is provided (instance ID), the extension will form the compound resource reference for the check.
+  - **Separate arguments**: pass the resource type as the first argument and the instance ID/key as the second (as shown above). If a third argument is provided (instance ID), the extension will form the compound resource reference for the check.
 
 - **resourceInstance** (optional): the unique identifier of the resource instance (if checking a specific instance). This is not needed for global (type-level) checks.
 
@@ -206,13 +206,13 @@ if (!canEdit) {
   prisma.$permit.check("transfer", "Account", accountId);
   ```
 
-  But behind the scenes Permit will evaluate attributes (e.g., allow if account status is open and user’s clearance is high).
+  But behind the scenes, Permit will evaluate attributes (e.g., allow if the account status is open and the user’s clearance is high).
 
 > Under the hood, this uses Permit’s core `permit.check()` function to evaluate the policy. It will consult Permit’s PDP (Policy Decision Point) with the given user, action, and resource to return an allow/deny decision.
 
 ## Enforcing Permissions (`enforceCheck`)
 
-Often, you want to not just get a boolean, but immediately enforce the result by preventing the operation when not allowed. The `prisma.$permit.enforceCheck(action, resource, resourceInstance?)` method wraps check and throws an error if the permission check fails. This helps you fail fast:
+Often, you want to not just get a boolean, but immediately enforce the result by preventing the operation when not allowed. The `prisma.$permit.enforceCheck(action, resource, resourceInstance?)` method wraps the check and throws an error if the permission check fails. This helps you fail fast:
 
 ```ts
 await prisma.$permit.enforceCheck("delete", "Document", documentId);
@@ -237,21 +237,21 @@ prisma.$permit.setUser(currentUserId);
 const docs = await prisma.document.findMany();
 ```
 
-When you call `findMany()` (or `findUnique`, etc.), the extension intercepts the query. It will query Permit to get the list of resource instances the user can access for that model and action (by default, the “read” action for find queries), and then inject an `id IN (...)` filter into the Prisma query before it hits the database. The result is that `docs` contains only the documents the user has permission to read **by policy**. The developer doesn’t need to manually filter by user ID or any attribute – permissions are centrally enforced.
+When you call `findMany()` (or `findUnique`, etc.), the extension intercepts the query. It will query Permit to get the list of resource instances the user can access for that model and action (by default, the “read” action for find queries), and then inject an `id IN (...)` filter into the Prisma query before it hits the database. The result is that `docs` contains only the documents the user has permission to read **by policy**. The developer doesn’t need to filter by user ID or any attribute manually – permissions are centrally enforced.
 
 If you did not enable automatic filtering, you can still achieve the same result manually using the extension’s helper function `getAllowedResourceIds`:
 
 ```ts
 const allowedIds = await prisma.$permit.getAllowedResourceIds("read", "Document");
-// allowedIds is an array of document IDs the user can read
+// allowedIds is an array of document IDs that the user can read
 const docs = await prisma.document.findMany({
   where: { id: { in: allowedIds } },
 });
 ```
 
-This two-step approach (first get allowed IDs, then query) is essentially what the extension does internally when `enableDataFiltering` is `true`. You might use it if you want more control or to debug what's happening. It’s also useful if you need to combine the permission filter with other custom filters.
+This two-step approach (first get allowed IDs, then query) is essentially what the extension does internally when `enableDataFiltering` is `true`. Use it if you want more control or to debug what's happening. It’s also useful if you need to combine the permission filter with other custom filters.
 
-**Performance note**: Permit’s PDP is designed to handle large scale permission checks quickly, but adding an extra check per query could introduce some latency. The automatic filtering tries to batch decisions (fetching many allowed IDs in one go) to minimize overhead. If a user has very large numbers of accessible resources, consider the implications on query performance (e.g., the `id IN (...)` clause). Typically, roles and permissions are structured to narrow down data to a manageable subset per user.
+**Performance note**: Permit’s PDP is designed to handle large-scale permission checks quickly, but adding an extra check per query could introduce some latency. The automatic filtering tries to batch decisions (fetching many allowed IDs in one go) to minimize overhead. If a user has very large numbers of accessible resources, consider the implications on query performance (e.g., the `id IN (...)` clause). Typically, roles and permissions are structured to narrow down data to a manageable subset per user.
 
 ---
 
@@ -269,7 +269,7 @@ If you update a record’s attributes (especially those used in ABAC policies), 
 
 ### On Delete:
 
-When a protected record is deleted in Prisma, the extension will inform Permit to delete or archive the corresponding resource instance, to keep the system clean. (Alternatively, Permit might mark it as inactive if needed for audit trails – refer to Permit.io docs for how deletions are handled via API.)
+When a protected record is deleted in Prisma, the extension will inform Permit to delete or archive the corresponding resource instance to keep the system clean. (Alternatively, Permit might mark it as inactive if needed for audit trails—refer to the Permit.io docs for how deletions are handled via API.)
 
 Auto-sync simplifies **data onboarding** into Permit.io. You can also choose to pre-create resources in Permit (via UI or migration scripts), but with auto-sync the system is kept in sync automatically with minimal effort.
 
@@ -279,10 +279,10 @@ Auto-sync simplifies **data onboarding** into Permit.io. You can also choose to 
 
 ## Putting It All Together (Example)
 
-Suppose we have a Prisma model `Project { id, name, ownerId, sensitive, ... }`. We want:
+Suppose we have a Prisma model `Project { id, name, ownerId, sensitive, ... }`. We want to allow policies where:
 
-- Only project owners (or admins) to update or delete a project.
-- Only team members (relationship) or users with a certain clearance (attribute) to view sensitive projects.
+- Only project owners (or admins) can update or delete a project.
+- Only team members (relationship) or users with a certain clearance (attribute) can view sensitive projects.
 
 With Permit.io, you could define:
 
@@ -299,13 +299,13 @@ prisma.$permit.setUser(currentUserId);
 // Enforce permission before updating a project
 await prisma.$permit.enforceCheck("update", "project", projectId);
 
-// If no error, safe to proceed
+// If no error, it's safe to proceed
 await prisma.project.update({
   where: { id: projectId },
   data: { name: newName },
 });
 
-// Get all projects current user can view
+// Get all projects that the current user can view
 const projects = await prisma.project.findMany();
 ```
 
@@ -315,7 +315,7 @@ In the create/update/delete operations, `enforceCheck` ensures that if the user 
 
 - **Default Deny**: If no permit policy explicitly allows a given action for a user, `check()` returns false (and `enforceCheck` throws). This follows the security best practice of default deny (least privilege).
 
-- **Error Handling**: You can customize how errors are handled. By default, `enforceCheck` uses a generic error. You might catch it and convert to an HTTP response or a custom error type. The Permit SDK can be configured with `throwOnError` (to throw on network issues) vs returning false. By default, network timeouts yield a false (denied) rather than throwing, to fail safe.
+- **Error Handling**: You can customize how errors are handled. By default, `enforceCheck` uses a generic error. You might catch it and convert it to an HTTP response or a custom error type. The Permit SDK can be configured with `throwOnError` (to throw on network issues) vs returning false. By default, network timeouts yield a false (denied) result rather than throwing, to fail safe.
 
 - **Logging**: Permit SDK can log debug info if needed (set `log: { level: "debug" }` in the Permit config passed to `PermitExtension` if exposed, or in an environment variable). This can help troubleshoot why something was denied.
 
