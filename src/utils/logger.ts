@@ -4,7 +4,7 @@ export const createLogger = (
   config: { debug?: boolean; service?: string; level?: string } = {}
 ) => {
   const level = config.debug ? "debug" : config.level || "info";
-  const service = config.service || "prisma-permit";
+  const service = config.service || "permit-prisma";
 
   return winston.createLogger({
     level,

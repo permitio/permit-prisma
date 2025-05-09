@@ -23,7 +23,7 @@ export function createPermitClientExtension(config: PermitExtensionConfig) {
   let currentUser: User | undefined;
 
   return Prisma.defineExtension({
-    name: "prisma-permit",
+    name: "permit-prisma",
     client: {
       $permit: {
         client: permitClient,

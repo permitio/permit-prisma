@@ -1,6 +1,6 @@
 # @permitio/permit-prisma – Fine-Grained Authorization Extension for Prisma
 
-Prisma Permit (`@permitio/prisma-permit`) is a Prisma Client extension that integrates Permit.io's fine-grained access control into your database queries. It enables role-based, attribute-based, and relationship-based access checks (RBAC, ABAC, ReBAC) directly through the Prisma Client, securing your application at the data layer. By using this extension, you ensure that every database operation is authorized according to central policies defined in Permit.io.
+Prisma Permit (`@permitio/permit-prisma`) is a Prisma Client extension that integrates Permit.io's fine-grained access control into your database queries. It enables role-based, attribute-based, and relationship-based access checks (RBAC, ABAC, ReBAC) directly through the Prisma Client, securing your application at the data layer. By using this extension, you ensure that every database operation is authorized according to central policies defined in Permit.io.
 
 The extension implements three key capabilities:
 - **Direct permission checks**: Check if users are authorized to perform specific actions on resources before executing database operations
@@ -14,7 +14,7 @@ Prisma is a powerful ORM but **does not provide built-in fine-grained authorizat
 Install the package (alongside the prisma client package) from npm:
 
 ```bash
-npm install @permitio/prisma-permit @prisma/client
+npm install @permitio/permit-prisma @prisma/client
 ```
 
 ## Prerequisites
@@ -37,7 +37,7 @@ To use the extension, import it and extend your Prisma Client instance:
 
 ```ts
 import { PrismaClient } from "@prisma/client";
-import { createPermitClientExtension } from "@permitio/prisma-permit";
+import { createPermitClientExtension } from "@permitio/permit-prisma";
 
 const prisma = new PrismaClient().$extends(
   createPermitClientExtension({
