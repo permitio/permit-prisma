@@ -1,4 +1,4 @@
-# Prisma Permit – Fine-Grained Authorization Extension for Prisma
+# @permitio/permit-prisma – Fine-Grained Authorization Extension for Prisma
 
 Prisma Permit (`@permitio/prisma-permit`) is a Prisma Client extension that integrates Permit.io's fine-grained access control into your database queries. It enables role-based, attribute-based, and relationship-based access checks (RBAC, ABAC, ReBAC) directly through the Prisma Client, securing your application at the data layer. By using this extension, you ensure that every database operation is authorized according to central policies defined in Permit.io.
 
