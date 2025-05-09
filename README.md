@@ -200,7 +200,6 @@ Before performing any operations with the extension, you need to identify which 
 
 In a typical web application, you'd set the user context at the beginning of a request handler after authenticating the user:
 
-```
 ```ts
 // Express.js example
 app.get('/documents', async (req, res) => {
@@ -216,7 +215,7 @@ app.get('/documents', async (req, res) => {
 ```
 You can set the user in different ways depending on your access control model:
 
-```
+```ts
 // Simple user identifier (for RBAC)
 prisma.$permit.setUser("user@example.com");
 
