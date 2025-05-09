@@ -152,38 +152,45 @@ createPermitClientExtension({
 
 ## Access Control Models
 
+This extension supports three access control models from Permit.io:
+
 ### Role-Based Access Control (RBAC)
 
-A model where access is granted based on user roles (`permit.io`). You define roles (e.g., _Admin_, _Editor_, _Viewer_) and assign them to users. Each role has permissions to perform certain actions on certain resource types. For example, an "Editor" role might allow `edit` on `Document` resources. In RBAC, permissions are typically global for a resource type (all documents) based on the user's role.
+**What it is**: Users are assigned roles (Admin, Editor, Viewer) with predefined permissions to perform actions on resource types.
 
----
+**Example**: An "Editor" role can update any document in the system.
+
+**Best for**: Simple permission structures where access is determined by job function or user level.
 
 ### Attribute-Based Access Control (ABAC)
 
-A model that grants or denies access based on attributes of the user, resource, or environment (`permit.io`). Policies consist of rules like:
+**What it is**: Access decisions based on attributes of users, resources, or environment.
 
-- Users can view documents if `user.department == document.department`
-- Only allow updates if `document.status == DRAFT`
+**Examples**:
+- Allow access if `user.department == document.department`
+- Allow updates if `document.status == "DRAFT"`
 
-ABAC allows very fine-grained rules using any metadata. To use ABAC with Permit, you define attributes for your users and resources in Permit.io, and create policy rules evaluating those attributes.
+**How it works with the extension**: When `enableAutoSync` is on, resource attributes are automatically synced to Permit.io for policy evaluation.
 
-> The Prisma Permit extension will sync resource attributes (if `enableAutoSync` is on) so that Permit’s PDP can evaluate those rules at check time.
-
----
+**Best for**: Dynamic rules that depend on context or data properties.
 
 ### Relationship-Based Access Control (ReBAC)
 
-A model focusing on relationships between users and resources (`permit.io`). A common example is role assignments on specific resource instances — e.g., a user might be an "Owner" or "Collaborator" on a particular project (but not others).
+**What it is**: Permissions based on relationships between users and specific resource instances.
 
-ReBAC policies take into account these relationships or group memberships. Permit.io supports ReBAC by allowing roles to be scoped to resource instances (and by supporting graph-based permissions).
+**Example**: A user is an "Owner" of document-123 but just a "Viewer" of document-456.
 
-With Prisma Permit, if you use ReBAC, you will likely attach users to resources (instances) in Permit (for example, assign a user the role "Owner" on a project with key `project123`). The `permit.check()` calls will then include resource instances (like `"project:project123"`) to verify instance-level permissions.
+**How it works with the extension**:
+- Resource instances are synced to Permit.io (with `enableAutoSync: true`)
+- Permission checks include the specific resource instance ID
 
-### Choose the model that fits your application’s needs:
+**Best for**: Collaborative applications where users need different permissions on different instances of the same resource type.
 
-- **Use RBAC** for straightforward role-based rules applied globally.
-- **Use ABAC** for context-aware rules based on attributes (often combined with roles).
-- **Use ReBAC** for per-resource-instance permissions and complex structures or sharing models.
+### Choosing the Right Model
+
+- **RBAC**: When you need simple, role-based access control
+- **ABAC**: When decisions depend on data properties or contextual information
+- **ReBAC**: When users need different permissions on different instances
 
 ## Using the Prisma Permit Extension
 

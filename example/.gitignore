@@ -1,3 +1,8 @@
 node_modules
 # Keep environment variables out of version control
 .env
+
+# DS Store
+.DS_Store
+echo ".DS_Store" >> .gitignore
+echo "**/.DS_Store" >> .gitignore

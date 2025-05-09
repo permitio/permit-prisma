@@ -12,7 +12,8 @@
     "file-folder:rebac": "ts-node rebac/file-folder.ts",
     "rebac-post-fetch-filter": "ts-node rebac/rebac-post-fetch-filtering.ts",
     "project-filtering": "ts-node abac/project-filtering.ts",
-    "document-ownership": "ts-node rebac/document-ownership.ts"
+    "document-ownership": "ts-node rebac/document-ownership.ts",
+    "patient-medical-record": "ts-node abac/patient-medical-record.ts"
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"

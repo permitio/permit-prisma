@@ -406,66 +406,111 @@
 
 
 // prisma/seed.ts
-import { PrismaClient } from "@prisma/client";
+// import { PrismaClient } from "@prisma/client";
+// const prisma = new PrismaClient();
+
+// async function main() {
+//   console.log('Seeding project data for ABAC testing...');
+  
+//   // Clear existing data
+//   await prisma.project.deleteMany({});
+  
+//   // Create projects with different statuses
+//   const projects = [
+//     {
+//       id: "project-draft-1",
+//       name: "Marketing Campaign Planning",
+//       status: "draft"
+//     },
+//     {
+//       id: "project-draft-2",
+//       name: "New Product Roadmap",
+//       status: "draft"
+//     },
+//     {
+//       id: "project-active-1",
+//       name: "Website Redesign",
+//       status: "active"
+//     },
+//     {
+//       id: "project-active-2",
+//       name: "Mobile App Development",
+//       status: "active"
+//     },
+//     {
+//       id: "project-completed-1",
+//       name: "Q1 Sales Report",
+//       status: "completed"
+//     },
+//     {
+//       id: "project-completed-2",
+//       name: "Employee Training Program",
+//       status: "completed"
+//     }
+//   ];
+  
+//   // Insert projects
+//   for (const project of projects) {
+//     await prisma.project.create({
+//       data: project
+//     });
+//   }
+
+//   console.log('✅ Projects seeded successfully!');
+  
+//   // Log the seeded data
+//   const seededProjects = await prisma.project.findMany();
+//   console.log(`Created ${seededProjects.length} projects:`);
+//   console.table(seededProjects.map(p => ({
+//     id: p.id,
+//     name: p.name,
+//     status: p.status
+//   })));
+// }
+
+// main()
+//   .catch((e) => {
+//     console.error('Error during seeding:', e);
+//     process.exit(1);
+//   })
+//   .finally(async () => {
+//     await prisma.$disconnect();
+//   });
+
+
+import { PrismaClient } from '@prisma/client';
+
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('Seeding project data for ABAC testing...');
-  
-  // Clear existing data
-  await prisma.project.deleteMany({});
-  
-  // Create projects with different statuses
-  const projects = [
-    {
-      id: "project-draft-1",
-      name: "Marketing Campaign Planning",
-      status: "draft"
-    },
-    {
-      id: "project-draft-2",
-      name: "New Product Roadmap",
-      status: "draft"
-    },
-    {
-      id: "project-active-1",
-      name: "Website Redesign",
-      status: "active"
-    },
-    {
-      id: "project-active-2",
-      name: "Mobile App Development",
-      status: "active"
-    },
-    {
-      id: "project-completed-1",
-      name: "Q1 Sales Report",
-      status: "completed"
-    },
-    {
-      id: "project-completed-2",
-      name: "Employee Training Program",
-      status: "completed"
-    }
-  ];
-  
-  // Insert projects
-  for (const project of projects) {
-    await prisma.project.create({
-      data: project
-    });
-  }
+  // Clear existing medical records
+  await prisma.medicalRecord.deleteMany();
 
-  console.log('✅ Projects seeded successfully!');
-  
-  // Log the seeded data
-  const seededProjects = await prisma.project.findMany();
-  console.log(`Created ${seededProjects.length} projects:`);
-  console.table(seededProjects.map(p => ({
-    id: p.id,
-    name: p.name,
-    status: p.status
-  })));
+  // Seed sample medical records
+  await prisma.medicalRecord.createMany({
+    data: [
+      {
+        id: 'record-1',
+        department: 'cardiology',
+        patientId: 'patient_1',
+        content: 'Patient 1 - Cardiology checkup results.',
+      },
+      {
+        id: 'record-2',
+        department: 'cardiology',
+        patientId: 'patient_2',
+        content: 'Patient 2 - Cardiology annual review.',
+      },
+      {
+        id: 'record-3',
+        department: 'oncology',
+        patientId: 'patient_3',
+        content: 'Patient 3 - Oncology treatment summary.',
+      },
+    ],
+  });
+
+  console.log('✅ Seeded medical records.');
 }
 
 main()

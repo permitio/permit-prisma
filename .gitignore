@@ -17,3 +17,8 @@ dev.db
 /coverage
 coverage-final.json
 clover.xml
+
+# DS Store
+.DS_Store
+echo ".DS_Store" >> .gitignore
+echo "**/.DS_Store" >> .gitignore
