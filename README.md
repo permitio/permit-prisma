@@ -244,3 +244,205 @@ await prisma.document.create({
 - Setting the user is thread-safe - it only affects the current Prisma client instance
 - You should call `setUser` once per request to ensure proper permission enforcement
 - The user context applies to all subsequent operations until you set a different user
+
+### RBAC Example: Document Access Control
+
+In this example, we implement role-based access to documents with different permission levels:
+- Admin: full access (create, read, update, delete)
+- Customer: read-only access
+
+#### 1. Setup RBAC in Permit.io
+
+First, configure your resources, roles, and permissions in Permit.io:
+- Create a `document` resource with `create`, `read`, `update`, `delete` actions
+- Define an `admin` role with all permissions
+- Define a `customer` role with only `read` permission
+
+Next, create the users and assign roles:
+
+- Navigate to User Management
+- Click "Add user"
+- Create user with Key: "admin@example.com"
+- Assign "admin" role in Top Level Access
+- Create another user with Key: "customer@example.com"
+- Assign "customer" role in Top Level Access
+
+#### 2. Implement with Prisma Permit
+
+```ts
+import { PrismaClient } from "@prisma/client";
+import { createPermitClientExtension, AccessControlModel } from "@permitio/prisma-permit";
+
+// Configure the extension with RBAC
+const prisma = new PrismaClient().$extends(
+  createPermitClientExtension({
+    permitConfig: {
+      token: process.env.PERMIT_API_KEY!,
+      pdp: "http://localhost:7766"
+    },
+    accessControlModel: AccessControlModel.RBAC,
+    enableAutomaticChecks: true  // Automatically enforce permissions
+  })
+);
+
+// Admin user operations
+async function adminOperations() {
+  // Set user context for the admin
+  prisma.$permit.setUser("admin@example.com");
+  
+  // Admin can create documents (allowed)
+  const doc = await prisma.document.create({
+    data: {
+      title: "New Document",
+      content: "Document content",
+      ownerId: "admin@example.com"
+    }
+  });
+  
+  // Admin can read documents (allowed)
+  const docs = await prisma.document.findMany();
+  
+  // Admin can update documents (allowed)
+  await prisma.document.update({
+    where: { id: doc.id },
+    data: { title: "Updated Title" }
+  });
+  
+  // Admin can delete documents (allowed)
+  await prisma.document.delete({ where: { id: doc.id } });
+}
+
+// Customer user operations
+async function customerOperations() {
+  // Set user context for the customer
+  prisma.$permit.setUser("customer@example.com");
+  
+  // Customer can read documents (allowed)
+  const docs = await prisma.document.findMany();
+  
+  try {
+    // Customer cannot create documents (denied)
+    await prisma.document.create({
+      data: { 
+        title: "Unauthorized Creation", 
+        content: "This will fail",
+        ownerId: "customer@example.com"
+      }
+    });
+  } catch (error) {
+    // Permission denied error
+  }
+  
+  // All other operations will similarly be denied
+}
+```
+#### How It Works
+The extension automatically:
+
+Intercepts all Prisma operations
+Checks if the current user has permission for the operation
+Allows or denies the operation based on the user's role
+
+For complete implementation, see `examples/rbac/document.ts`.
+
+### ABAC Example: Medical Records Access Control
+
+In this example, we implement attribute-based access to medical records where permissions are determined by matching the user's department with the record's department:
+
+- Cardiologists can only access cardiology records
+- Oncologists can only access oncology records
+
+#### 1. Setup ABAC in Permit.io
+
+First, configure resources and attributes in Permit.io:
+
+- Create a `medical_record` resource with a `department` attribute
+- Create users with a `department` attribute
+- Create condition sets for user departments and resource departments
+- Set policies to allow access only when departments match
+
+#### 2. Implement with Prisma Permit
+
+```ts
+import { PrismaClient } from "@prisma/client";
+import { createPermitClientExtension, AccessControlModel } from "@permitio/prisma-permit";
+
+// Configure the extension with ABAC
+const prisma = new PrismaClient().$extends(
+  createPermitClientExtension({
+    permitConfig: {
+      token: process.env.PERMIT_API_KEY!,
+      pdp: "http://localhost:7766"
+    },
+    accessControlModel: AccessControlModel.ABAC, 
+    enableAutomaticChecks: true,
+  })
+);
+
+// Example: Cardiologist operations
+async function cardiologistOperations() {
+  // Set user with department attribute
+  prisma.$permit.setUser({
+    key: "doctor_cardio@example.com",
+    attributes: { 
+      department: "cardiology" 
+    }
+  });
+  
+  // Can access cardiology records (ALLOWED)
+  const cardioRecords = await prisma.medicalRecord.findMany({
+    where: { department: "cardiology" }
+  });
+  
+  // Can update cardiology records (ALLOWED)
+  if (cardioRecords.length > 0) {
+    await prisma.medicalRecord.update({
+      where: { id: cardioRecords[0].id },
+      data: { 
+        content: "Updated by cardiologist",
+        department: "cardiology"  // Must include department
+      }
+    });
+  }
+  
+  // Cannot access oncology records (DENIED)
+  try {
+    await prisma.medicalRecord.findMany({
+      where: { department: "oncology" }
+    });
+  } catch (error) {
+    // Permission denied
+  }
+}
+
+// Example: Oncologist operations
+async function oncologistOperations() {
+  // Set user with department attribute
+  prisma.$permit.setUser({
+    key: "doctor_onco@example.com",
+    attributes: { 
+      department: "oncology" 
+    }
+  });
+  
+  // Can access oncology records (ALLOWED)
+  const oncoRecords = await prisma.medicalRecord.findMany({
+    where: { department: "oncology" }
+  });
+  
+  // Cannot access cardiology records (DENIED)
+  try {
+    await prisma.medicalRecord.findMany({
+      where: { department: "cardiology" }
+    });
+  } catch (error) {
+    // Permission denied
+  }
+}
+```
+#### 3. Key Points for ABAC
+
+- User context must include attributes (use `setUser` with an `attributes` object).
+- Resources must have corresponding attributes for policy evaluation.
+- When updating records, include all attributes used in permission decisions.
+- For a complete implementation, refer to `examples/abac/medical-records.ts`.
