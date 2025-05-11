@@ -446,3 +446,133 @@ async function oncologistOperations() {
 - Resources must have corresponding attributes for policy evaluation.
 - When updating records, include all attributes used in permission decisions.
 - For a complete implementation, refer to `examples/abac/medical-records.ts`.
+
+### ReBAC Example: File and Folder Permission Hierarchy
+
+In this example, we implement relationship-based access control for a file system where:
+- Folder owners have full access to folders and all files within them
+- Folder viewers can only read folders and their files
+- Permissions propagate through relationships (e.g., folder owner status grants file owner rights)
+
+#### 1. Setup ReBAC in Permit.io
+
+First, configure your resources, relationships, and instance roles in Permit.io:
+
+1. **Create Resources**:
+   - Create a `folder` resource with `create`, `read`, `update`, `delete` actions
+   - Create a `file` resource with `create`, `read`, `update`, `delete` actions
+   - Define a relationship: "folder is parent of file"
+
+2. **Define Instance Roles**:
+   - Create `folder#owner` role with full permissions (create, read, update, delete)
+   - Create `folder#viewer` role with read-only permission
+   - Create `file#owner` role with full permissions
+   - Create `file#viewer` role with read-only permission
+
+3. **Set Role Derivations**:
+   - Configure `folder#owner` to derive `file#owner` when a folder is parent of a file
+   - Configure `folder#viewer` to derive `file#viewer` when a folder is parent of a file
+
+4. **Create Users and Assign Roles**:
+   - Create users (e.g., "owner_user", "viewer_user")
+   - Assign instance roles to users (e.g., "owner_user" as owner of folder1, "viewer_user" as viewer of folder1)
+
+#### 2. Implement with Prisma Permit
+
+```ts
+import { PrismaClient } from "@prisma/client";
+import { createPermitClientExtension, AccessControlModel } from "@permitio/permit-prisma";
+
+// Configure the extension with ReBAC
+const prisma = new PrismaClient().$extends(
+  createPermitClientExtension({
+    permitConfig: {
+      token: process.env.PERMIT_API_KEY!,
+      pdp: "http://localhost:7766"
+    },
+    accessControlModel: AccessControlModel.ReBAC,
+    enableAutomaticChecks: true,
+  })
+);
+
+// Owner user operations
+async function ownerOperations() {
+  // Set user context for the owner
+  prisma.$permit.setUser("owner_user");
+  
+  // Create a new folder (allowed)
+  const folder = await prisma.folder.create({
+    data: {
+      name: "Owner's New Folder",
+      ownerId: "owner_user"
+    }
+  });
+  
+  // Create a file in the folder (allowed)
+  const file = await prisma.file.create({
+    data: {
+      name: "Owner's File",
+      content: "Content created by owner",
+      folderId: folder.id  // This establishes the relationship
+    }
+  });
+  
+  // Update the file (allowed)
+  await prisma.file.update({
+    where: { id: file.id },
+    data: { content: "Modified content" }
+  });
+  
+  // Read all files (returns all files the owner can access)
+  const files = await prisma.file.findMany();
+}
+
+// Viewer user operations
+async function viewerOperations() {
+  // Set user context for the viewer
+  prisma.$permit.setUser("viewer_user");
+  
+  // Try to create a folder (denied)
+  try {
+    await prisma.folder.create({
+      data: {
+        name: "Viewer's Folder",
+        ownerId: "viewer_user"
+      }
+    });
+  } catch (error) {
+    // Permission denied error
+  }
+  
+  // Read a folder (allowed)
+  const folder = await prisma.folder.findUnique({
+    where: { id: "folder1" }
+  });
+  
+  // Read files (allowed, returns only files the viewer can access)
+  const files = await prisma.file.findMany();
+  
+  // Try to update a file (denied)
+  try {
+    await prisma.file.update({
+      where: { id: "file1" },
+      data: { content: "Attempt to modify" }
+    });
+  } catch (error) {
+    // Permission denied error
+  }
+}
+```
+
+### 3. Key Points for ReBAC
+
+- ReBAC extends basic role-based permissions with **instance-level** assignments
+- The relationship between resources (folder is parent of file) is used to propagate permissions
+- Role derivations (e.g., folder owner → file owner) create permission inheritance
+- When `enableAutoSync` is enabled, relationships established in your data model are automatically synced to Permit.io
+- `enableDataFiltering` ensures queries like `findMany()` only return resources the user has permission to access
+
+The key advantage of ReBAC is that it maps naturally to real-world ownership and access patterns. Users can have different roles on different instances of the same resource type, and permissions flow naturally through relationships.
+
+For a complete implementation with detailed tests, refer to `examples/rebac/rebac-folder-file.ts`.
+
