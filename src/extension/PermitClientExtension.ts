@@ -170,7 +170,6 @@ export function createPermitClientExtension(config: PermitExtensionConfig) {
             config.accessControlModel
           );
 
-          if (config.accessControlModel !== AccessControlModel.ReBAC) {
             if (config.permitConfig.debug) {
               logger.info(
                 `[Permit] Checking permission: ${
@@ -182,7 +181,6 @@ export function createPermitClientExtension(config: PermitExtensionConfig) {
                 }`
               );
             }
-
             const allowed = await permitClient.check(user, action, resource);
             if (!allowed) {
               const userStr = typeof user === "string" ? user : user.key;
@@ -197,7 +195,7 @@ export function createPermitClientExtension(config: PermitExtensionConfig) {
               }
               throw new PermitError(errorMessage);
             }
-          }
+          
 
           const result = await query(args);
 
