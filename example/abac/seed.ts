@@ -1,4 +1,4 @@
-// import { PrismaClient } from '@prisma/client';
+// import { PrismaClient } from "@prisma/client";
 
 // const prisma = new PrismaClient();
 
@@ -6,27 +6,27 @@
 //   await prisma.medicalRecord.createMany({
 //     data: [
 //       {
-//         id: 'record-1',
-//         patientId: 'patient_1',
-//         department: 'cardiology',
-//         content: 'Patient heart examination results.',
+//         id: "record-1",
+//         patientId: "patient_1",
+//         department: "cardiology",
+//         content: "Patient heart examination results.",
 //       },
 //       {
-//         id: 'record-2',
-//         patientId: 'patient_2',
-//         department: 'cardiology',
-//         content: 'Follow-up after surgery.',
+//         id: "record-2",
+//         patientId: "patient_2",
+//         department: "cardiology",
+//         content: "Follow-up after surgery.",
 //       },
 //       {
-//         id: 'record-3',
-//         patientId: 'patient_3',
-//         department: 'oncology',
-//         content: 'Initial cancer screening.',
+//         id: "record-3",
+//         patientId: "patient_3",
+//         department: "oncology",
+//         content: "Initial cancer screening.",
 //       },
 //     ],
 //   });
 
-//   console.log('Seeded medical records!');
+//   console.log("Seeded medical records!");
 // }
 
 // main()

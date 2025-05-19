@@ -2,13 +2,7 @@ import { Prisma } from "@prisma/client/extension";
 import { PermitClient } from "../client/PermitClient";
 import { PermitExtensionConfig } from "../models/PermitExtensionConfig";
 import { IPermitClient } from "../types/IPermitClient";
-import {
-  User,
-  Action,
-  Resource,
-  Context,
-  AccessControlModel,
-} from "../models/PermissionModels";
+import { User, Action, Resource, Context } from "../models/PermissionModels";
 import { PermitError } from "../utils/error";
 import {
   mapOperationToAction,
@@ -73,14 +67,14 @@ export function createPermitClientExtension(config: PermitExtensionConfig) {
             throw new PermitError("No user set for permission filtering");
           }
 
-          const resources = results.map(result => ({
+          const resources = results.map((result) => ({
             type: resourceType,
             id: result.id,
-            attributes: result
+            attributes: result,
           }));
-          
+
           return permitClient.filterObjects(currentUser, action, resources);
-        }      
+        },
       },
     },
     query: {
@@ -106,11 +100,7 @@ export function createPermitClientExtension(config: PermitExtensionConfig) {
             return query(args);
           }
 
-          if (
-            config.enableDataFiltering &&
-            config.accessControlModel === AccessControlModel.ReBAC &&
-            operation === "findMany"
-          ) {
+          if (config.enableDataFiltering && operation === "findMany") {
             const resourceType = mapModelToResourceType(
               model,
               config.resourceTypeMapping
@@ -163,45 +153,38 @@ export function createPermitClientExtension(config: PermitExtensionConfig) {
             model,
             config.resourceTypeMapping
           );
-          let resource = createResourceObject(
-            resourceType,
-            args,
-            operation,
-            config.accessControlModel
-          );
+          let resource = createResourceObject(resourceType, args, operation);
 
-            if (config.permitConfig.debug) {
-              logger.info(
-                `[Permit] Checking permission: ${
-                  typeof user === "string" ? user : JSON.stringify(user)
-                } -> ${action} -> ${
-                  typeof resource === "string"
-                    ? resource
-                    : JSON.stringify(resource)
-                }`
-              );
-            }
-            const allowed = await permitClient.check(user, action, resource);
-            if (!allowed) {
-              const userStr = typeof user === "string" ? user : user.key;
-              const resourceStr =
+          if (config.permitConfig.debug) {
+            logger.info(
+              `[Permit] Checking permission: ${
+                typeof user === "string" ? user : JSON.stringify(user)
+              } -> ${action} -> ${
                 typeof resource === "string"
                   ? resource
-                  : `${resource.type}${resource.key ? `:${resource.key}` : ""}`;
-              const errorMessage = `Permission denied: User ${userStr} is not allowed to perform ${action} operation on ${resourceStr} resource`;
+                  : JSON.stringify(resource)
+              }`
+            );
+          }
+          const allowed = await permitClient.check(user, action, resource);
+          if (!allowed) {
+            const userStr = typeof user === "string" ? user : user.key;
+            const resourceStr =
+              typeof resource === "string"
+                ? resource
+                : `${resource.type}${resource.key ? `:${resource.key}` : ""}`;
+            const errorMessage = `Permission denied: User ${userStr} is not allowed to perform ${action} operation on ${resourceStr} resource`;
 
-              if (config.permitConfig.debug) {
-                logger.info(`[Permit] ${errorMessage}`);
-              }
-              throw new PermitError(errorMessage);
+            if (config.permitConfig.debug) {
+              logger.info(`[Permit] ${errorMessage}`);
             }
-          
+            throw new PermitError(errorMessage);
+          }
 
           const result = await query(args);
 
           if (
-            config.enableAutoSync &&
-            config.accessControlModel === AccessControlModel.ReBAC &&
+            (config.enableResourceSync || config.enableAttributeSync) &&
             ["create", "update", "delete"].includes(operation)
           ) {
             const resourceKey = getResourceIdForSync(result, operation);

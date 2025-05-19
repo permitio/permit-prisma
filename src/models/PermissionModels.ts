@@ -9,9 +9,3 @@ export type Resource =
       attributes?: Record<string, any>;
     };
 export type Context = Record<string, any>;
-
-export enum AccessControlModel {
-  RBAC = "rbac",
-  ABAC = "abac",
-  ReBAC = "rebac",
-}

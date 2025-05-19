@@ -8,7 +8,7 @@
     "@prisma/client",
     "extension",
     "permitio",
-    "permit",
+    "permit", 
     "authorization",
     "rbac",
     "abac",

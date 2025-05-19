@@ -1,5 +1,5 @@
 // import { PrismaClient } from "@prisma/client";
-// import createPermitClientExtension, { AccessControlModel, PermitError } from "../../src";
+// import createPermitClientExtension, { PermitError } from "../../src";
 // import dotenv from "dotenv";
 // import logger from "../../src/utils/logger";
 
@@ -15,7 +15,6 @@
 // const clientExtensionConfig = {
 //   permitConfig,
 //   enableAutomaticChecks: true,
-//   accessControlModel: AccessControlModel.RBAC,
 // };
 
 // const prisma = new PrismaClient().$extends(
@@ -83,7 +82,9 @@
 //       if (error instanceof PermitError) {
 //         logger.info("✅ CREATE correctly failed with permission error");
 //       } else {
-//         logger.error(`❌ CREATE failed with unexpected error: ${error.message}`);
+//         logger.error(
+//           `❌ CREATE failed with unexpected error: ${error.message}`
+//         );
 //       }
 //     }
 
@@ -104,7 +105,9 @@
 //       if (error instanceof PermitError) {
 //         logger.info("✅ UPDATE correctly failed with permission error");
 //       } else {
-//         logger.error(`❌ UPDATE failed with unexpected error: ${error.message}`);
+//         logger.error(
+//           `❌ UPDATE failed with unexpected error: ${error.message}`
+//         );
 //       }
 //     }
 
@@ -117,7 +120,9 @@
 //       if (error instanceof PermitError) {
 //         logger.info("✅ DELETE correctly failed with permission error");
 //       } else {
-//         logger.error(`❌ DELETE failed with unexpected error: ${error.message}`);
+//         logger.error(
+//           `❌ DELETE failed with unexpected error: ${error.message}`
+//         );
 //       }
 //     }
 

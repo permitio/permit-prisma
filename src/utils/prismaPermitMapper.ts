@@ -1,5 +1,3 @@
-import { AccessControlModel } from "../models/PermissionModels";
-
 /**
  * Maps Prisma query operations to Permit.io permission action names.
  * This function translates Prisma's operation types (like findMany, create, etc.)
@@ -7,7 +5,7 @@ import { AccessControlModel } from "../models/PermissionModels";
  *
  * @param {string} operation - The Prisma operation name (e.g., "findMany", "create", "update")
  * @returns {string} The corresponding Permit.io action name (e.g., "read", "create", "update")
- * 
+ *
  * @example
  * mapOperationToAction("findMany") // Returns "read"
  * mapOperationToAction("create")   // Returns "create"
@@ -40,17 +38,17 @@ export function mapOperationToAction(operation: string): string {
 
 /**
  * Maps Prisma model names to Permit.io resource types.
- * This function converts Prisma model names (typically PascalCase) to Permit.io 
+ * This function converts Prisma model names (typically PascalCase) to Permit.io
  * resource type identifiers (typically snake_case) unless a custom mapping is provided.
  *
  * @param {string} model - The Prisma model name (e.g., "User", "BlogPost")
  * @param {Record<string, string>} [mapping] - Optional custom mapping from model names to resource types
  * @returns {string} The corresponding Permit.io resource type identifier
- * 
+ *
  * @example
  * // Without mapping
  * mapModelToResourceType("UserProfile") // Returns "user_profile"
- * 
+ *
  * // With custom mapping
  * const mapping = { "User": "customer" };
  * mapModelToResourceType("User", mapping) // Returns "customer"
@@ -75,49 +73,65 @@ export function mapModelToResourceType(
  * @param {string} operation - The Prisma operation being performed (e.g., "create", "update")
  * @param {AccessControlModel} [modelType] - The access control model (RBAC, ABAC, or ReBAC)
  * @returns {string|object} A formatted resource object compatible with Permit.io checks
- * 
+ *
  * @example
  * // No model type or RBAC - simple string
  * createResourceObject("document", {}, "read")
  * // Returns: "document"
- * 
+ *
  * // ABAC - object with attributes
  * createResourceObject("document", { data: { confidential: true }}, "create", AccessControlModel.ABAC)
  * // Returns: { type: "document", attributes: { confidential: true }}
- * 
+ *
  * // ReBAC - object with resource ID and attributes
  * createResourceObject("document", { where: { id: "123" }}, "update", AccessControlModel.ReBAC)
  * // Returns: { type: "document", key: "123", attributes: {...} }
  */
+// export function createResourceObject(
+//   resourceType: string,
+//   args: any,
+//   operation: string,
+//   modelType?: AccessControlModel
+// ): any {
+//   if (modelType === AccessControlModel.RBAC) {
+//     return resourceType;
+//   }
+
+//   if (modelType === AccessControlModel.ABAC) {
+//     return {
+//       type: resourceType,
+//       attributes: extractAttributes(args),
+//     };
+//   }
+
+//   if (modelType === AccessControlModel.ReBAC) {
+//     const key = getResourceId(args?.where);
+//     const attributes = extractAttributes(args);
+
+//     return {
+//       type: resourceType,
+//       ...(key !== undefined && { key }),
+//       ...(attributes && Object.keys(attributes).length > 0 && { attributes }),
+//     };
+//   }
+
+//   return resourceType;
+// }
+
 export function createResourceObject(
   resourceType: string,
   args: any,
-  operation: string,
-  modelType?: AccessControlModel
+  operation: string
 ): any {
-  if (modelType === AccessControlModel.RBAC) {
-    return resourceType;
-  }
+  const key = getResourceId(args?.where);
+  const attributes = extractAttributes(args);
 
-  if (modelType === AccessControlModel.ABAC) {
-    return {
-      type: resourceType,
-      attributes: extractAttributes(args),
-    };
-  }
-
-  if (modelType === AccessControlModel.ReBAC) {
-    const key = getResourceId(args?.where);
-    const attributes = extractAttributes(args);
-
-    return {
-      type: resourceType,
-      ...(key !== undefined && { key }),
-      ...(attributes && Object.keys(attributes).length > 0 && { attributes }),
-    };
-  }
-
-  return resourceType;
+  // Always return a complete resource object with all available information
+  return {
+    type: resourceType,
+    ...(key !== undefined && { key }),
+    ...(attributes && Object.keys(attributes).length > 0 && { attributes }),
+  };
 }
 
 /**
@@ -159,24 +173,23 @@ export function getResourceIdForSync(
   return null;
 }
 
-
 /**
  * Extracts attributes from Prisma query arguments to be used in ABAC/ReBAC permission checks.
- * This function attempts to extract meaningful data attributes from either the `data` object 
+ * This function attempts to extract meaningful data attributes from either the `data` object
  * (in create/update operations) or the `where` object (in read/delete operations).
  *
  * @param {any} args - The Prisma query arguments object
  * @returns {Record<string, any>} An object containing extracted attributes, or an empty object if no attributes found
- * 
+ *
  * @example
  * // From create/update operation
  * extractAttributes({ data: { title: "Document", confidential: true }})
  * // Returns: { title: "Document", confidential: true }
- * 
+ *
  * // From read/delete operation
  * extractAttributes({ where: { id: "123", status: "active" }})
  * // Returns: { id: "123", status: "active" }
- * 
+ *
  * // When no relevant data is found
  * extractAttributes({})
  * // Returns: {}
